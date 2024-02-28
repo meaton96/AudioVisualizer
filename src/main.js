@@ -50,11 +50,6 @@ const setupUI = (canvasElement) => {
   setupCheckboxes();
 
 
-
-
-  //add .onclick event to button
-
-
 } // end setupUI
 
 const setupVolumeSilder = () => {

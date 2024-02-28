@@ -19,9 +19,23 @@ let particleBeatTracking = {
     beatCutOff: 0,
     beatTime: 0,
     beatHoldTime: 2.5,
-    beatDecayRate: 0.9,
-    beatMin: 1 // minimum beat cutoff
+    beatDecayRate: 0.95,
+    beatMin: 1,
+    threshhold: 125
 };
+
+let fftSize;
+const sampleRate = 44100; // This is a common sample rate for audio; adjust if yours is different
+
+
+// Define your target frequency range
+const melodyStartFrequency = 0; // example start frequency in Hz
+const melodyEndFrequency = 200; // example end frequency in Hz
+
+// Calculate corresponding bin indexes
+const melodyStartBin = Math.floor((melodyStartFrequency * fftSize) / sampleRate);
+const melodyEndBin = Math.floor((melodyEndFrequency * fftSize) / sampleRate);
+
 
 const setupCanvas = (canvasElement, analyserNodeRef) => {
     // create drawing context
@@ -33,6 +47,7 @@ const setupCanvas = (canvasElement, analyserNodeRef) => {
     gradient = utils.getLinearGradient(ctx, 0, 0, 0, canvasHeight, [{ percent: 0, color: "#87CEFA" }, { percent: .25, color: "#E6E6FA" }, { percent: .5, color: "#D8BFD8" }, { percent: .75, color: "#FFDDF4" }, { percent: 1, color: "#FFE4E1" }]);
     // keep a reference to the analyser node
     analyserNode = analyserNodeRef;
+    analyserNode.fftSize; // This should be set on your analyserNode
     // this is the array where the analyser data will be stored
     audioData = new Uint8Array(analyserNode.fftSize / 2);
 
@@ -52,18 +67,7 @@ const updateParticles = () => {
 
         // Determine the frequency bins that correspond to the melody or significant beats
 
-        const fftSize = analyserNode.fftSize; // This should be set on your analyserNode
-        const sampleRate = 44100; // This is a common sample rate for audio; adjust if yours is different
-
-
-
-        // Define your target frequency range
-        const melodyStartFrequency = 0; // example start frequency in Hz
-        const melodyEndFrequency = 200; // example end frequency in Hz
-
-        // Calculate corresponding bin indexes
-        const melodyStartBin = Math.floor((melodyStartFrequency * fftSize) / sampleRate);
-        const melodyEndBin = Math.floor((melodyEndFrequency * fftSize) / sampleRate);
+        console.log("average: " + average);
 
         let melodySum = 0;
         for (let i = melodyStartBin; i <= melodyEndBin; i++) {
@@ -75,27 +79,27 @@ const updateParticles = () => {
            // console.log("Prominent beat detected");
             particles.forEach(p => {
                 //p.swapAngularVelocity();
-            //    p.incrementHue(10);
-               // p.vx *= -1;
-               // p.vy *= -1;
+                //    p.incrementHue(10);
+                // p.vx *= -1;
+                // p.vy *= -1;
             });
         }
 
         particleBeatTracking.beatCutOff = average * 1.5;
-        let threshhold = 150;
+
 
         for (let i = 0; i < audioData.length; i++) {
-            console.log(audioData[i]);
+           // console.log(audioData[i]);
             // Check if the frequency for this bin is significantly present
-            if (audioData[i] > threshhold) { // Replace 'someThreshold' with your chosen minimum value
+            if (audioData[i] > particleBeatTracking.threshhold) { 
                 let angle = (i / audioData.length) * Math.PI * 2 + baseAngle;
-        
+
                 let pos = { x: canvasWidth / 2, y: canvasHeight / 2 };
                 pos.x += Math.cos(angle) * 50; // You can adjust the radius here
                 pos.y += Math.sin(angle) * 50; // Same as above
-                
+
                 // Create a particle for this bin
-                let p = new Particle(pos.x, pos.y, angle); 
+                let p = new Particle(pos.x, pos.y, angle);
                 particles.push(p);
             }
         }
