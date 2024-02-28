@@ -1,0 +1,43 @@
+body {
+    background: #1f1f20;
+    font-family: tahoma, verdana, sans serif;
+    color: white;
+  }
+  
+  canvas {
+    margin-left: 1rem;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 4px 4px 8px rgba(0,0,0,0.5);
+    background: #fafafa;
+  }
+  
+  #controls{
+    margin-left: 1rem;
+  }
+  
+  #label-volume{
+    margin-left: 1rem;
+  }
+  
+  section{
+    margin-bottom: 1rem;
+  }
+  
+  #btn-play{
+    font-size: 1.2rem;
+    width: 6rem;
+  }
+  
+  button[data-playing="yes"]:after{
+    content: "Pause";
+  }
+  
+  button[data-playing="no"]:after{
+    content: "Play";
+  }
+  
+  #btn-fs{
+    font-size: 1.2rem;
+    width: 8rem;
+  }
