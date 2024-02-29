@@ -10,6 +10,7 @@
 import * as utils from './utils.js';
 import * as audio from './audio.js';
 import * as canvas from './canvas.js';
+import * as particleController from './particle-controller.js';
 
 const drawParams = {
   showGradient: true,
@@ -96,12 +97,12 @@ const setupButtons = (canvasElement) => {
     console.log(`audioCtx.state after = ${audio.audioCtx.state}`);
     if (e.target.dataset.playing == "no") {
       // if track is currently paused, play it
-      canvas.clearParticles();
+      particleController.clearParticles();
       audio.playCurrentSound();
       e.target.dataset.playing = "yes";
     } else {
       // if track is currently playing, pause it
-      canvas.clearParticles();
+      particleController.clearParticles();
       audio.pauseCurrentSound();
       e.target.dataset.playing = "no";
     }

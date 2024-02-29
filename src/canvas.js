@@ -8,28 +8,15 @@
 */
 
 import * as utils from './utils.js';
-import { Particle } from './particle.js';
+import * as particleController from './particle-controller.js';
 
 let ctx, canvasWidth, canvasHeight, gradient, analyserNode, audioData, audioDataWaveform;
 
-let baseAngle = 0;
 let stars = [];
 
 let vignetteFadeSpeed = .02;
 
-let beatIntensity = 0;
-let beatDetected = false;
-let particles = [];
-let particleBeatTracking = {
-    spawnRadius: 50,
-    beatCutOff: 0,
-    beatTime: 0,
-    beatHoldTime: 2.5,
-    beatDecayRate: 0.9,
-    beatMin: .15,
-    audibleThreshold: 120,
-    bassEndBin: 5,
-};
+
 
 const setupCanvas = (canvasElement, analyserNodeRef) => {
     // create drawing context
@@ -47,86 +34,7 @@ const setupCanvas = (canvasElement, analyserNodeRef) => {
     createStars(500);
 
 }
-const updateParticles = () => {
-    // Compute the sum of the lower frequencies
-    let sum = 0;
-    for (let i = 0; i < particleBeatTracking.bassEndBin; i++) {
-        sum += audioData[i];
-    }
-    let average = sum / particleBeatTracking.bassEndBin;
-    let angleIncrement = (Math.PI * 2) / (analyserNode.fftSize / 2.35);
 
-    if (average > particleBeatTracking.beatCutOff && average > particleBeatTracking.beatMin) {
-        // Iterate through all the bins of the frequency data
-
-        for (let i = 0; i < audioData.length; i++) {
-            // console.log(`Frequency bin ${i} has a value of ${audioData[i]}`);
-
-            // Check if the frequency value exceeds the audible threshold
-            if (audioData[i] > particleBeatTracking.audibleThreshold) {
-                //50% loader than base threshold
-                if (!beatDetected && audioData[i] > particleBeatTracking.audibleThreshold * 2) {
-                    console.log("loud beat detected");
-                    beatDetected = true;
-                    beatIntensity = audioData[i] / 256;
-                }
-
-                // Calculate the angle for this particle
-                let angle = i * angleIncrement + baseAngle;
-                let pos = { x: canvasWidth / 2, y: canvasHeight / 2 };
-                pos.x += Math.cos(angle) * particleBeatTracking.spawnRadius; // You can adjust the radius here
-                pos.y += Math.sin(angle) * particleBeatTracking.spawnRadius; // Same as above
-
-                // Create and add a new particle for this frequency bin
-                let p = new Particle(pos.x, pos.y, angle, i, 2.5, audioData[i] / 256 * 10);
-                particles.push(p);
-
-            }
-
-        }
-
-        // particles.forEach(p => p.pulseRadius());
-
-        // Reset beat tracking after spawning particles
-        particleBeatTracking.beatCutOff = average * 1.5;
-        particleBeatTracking.beatTime = 0;
-
-    } else {
-        if (particleBeatTracking.beatTime <= particleBeatTracking.beatHoldTime) {
-            particleBeatTracking.beatTime++;
-        } else {
-            particleBeatTracking.beatCutOff *= particleBeatTracking.beatDecayRate;
-            particleBeatTracking.beatCutOff = Math.max(particleBeatTracking.beatCutOff, particleBeatTracking.beatMin);
-        }
-    }
-
-    // Update and draw particles
-    particles.forEach((p, index) => {
-        // Map the particle's index to a position in the waveform data
-        let waveformIndex = Math.floor(index * (audioDataWaveform.length / particles.length));
-        let waveformValue = audioDataWaveform[waveformIndex];
-        p.update(waveformValue); // Pass the corresponding waveform value
-        p.draw(ctx);
-
-        // Remove the particle if it's no longer visible
-
-        //  p.move();
-        //p.updateBasedOnMusic(audioData);
-        //   p.draw(ctx);
-        if (p.alpha <= p.alphaFadePerFrame || p.radius <= -p.radiusGrowthPerFrame) {
-
-            particles.splice(index, 1);
-        }
-    });
-};
-const clearParticles = () => {
-    particles.forEach((p, index) => {
-        p.runaway = true;
-        //particles.splice(index, 1);
-
-    });
-
-}
 function drawVignette(beatIntensity) {
     // Determine the inner radius based on the beat intensity
     // The more intense the beat, the larger the inner radius (less vignette)
@@ -182,7 +90,7 @@ const draw = (params = {}) => {
     else {
         analyserNode.getByteFrequencyData(audioData);
     }
-    beatDetected = false;
+    particleController.resetBeatDetection();
 
     if (params.showStars)
         drawStars();
@@ -191,12 +99,12 @@ const draw = (params = {}) => {
 
 
 
-    if (!beatDetected) { // Assuming you have a way to detect beats
-        beatIntensity = Math.max(0, beatIntensity - vignetteFadeSpeed); // Gradually decrease
+    if (!particleController.beatDetected) { // Assuming you have a way to detect beats
+        particleController.fadeVignette(vignetteFadeSpeed);
     }
 
     if (params.showVignette)
-        drawVignette(beatIntensity);
+        drawVignette(particleController.beatIntensity);
 
 
 
@@ -325,7 +233,7 @@ const drawAudioVisualizer = (params = {}) => {
         ctx.restore();
     }
     if (params.showParticles) {
-        updateParticles();
+        particleController.updateParticles(audioData, audioDataWaveform, analyserNode,canvasWidth, canvasHeight, ctx);
     }
     if (params.showLine) {
         let margin = 4; // Margin from the bottom of the canvas
@@ -352,4 +260,4 @@ const drawAudioVisualizer = (params = {}) => {
 
 }
 
-export { setupCanvas, draw, clearParticles };
+export { setupCanvas, draw };

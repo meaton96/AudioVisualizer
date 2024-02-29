@@ -8,10 +8,12 @@ export class Particle {
         alphaFadePerFrame: .002,
         radiusGrowthPerFrame: 0.05,
         speedMultiplier: 1,
-        frequencyResponsiveness: 1
+        frequencyResponsiveness: 1,
+        baseRadius: 10,
+        baseSpeed: 2.5
     
     } 
-    
+
 
     constructor(x, y, angle, frequencyBin, speed = 2.5, radius = 5) {
         this.x = x;             // x-coordinate                 
