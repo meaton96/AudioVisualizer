@@ -1,5 +1,5 @@
 import { Particle } from './particle.js';
-import { detectBeat, getBeatDetected } from './canvas.js';
+import { detectBeat, getBeatDetected, detectVeryLoudBeat } from './canvas.js';
 import { DEFAULTS } from './audio.js';
 
 let particles = [];
@@ -37,10 +37,15 @@ const updateParticles = (audioData, audioDataWaveform, analyserNode, canvasWidth
 
                 //twice as loud as the threshold
                 //used for modifying the vignette
-                if (!getBeatDetected() && audioData[i] > particleBeatTracking.audibleThreshold * 2) {
+                if (!getBeatDetected() && audioData[i] > 253) {
+                    detectVeryLoudBeat();
                     
-                    detectBeat();
                 }
+                else if (audioData[i] > particleBeatTracking.audibleThreshold * 2) {
+                    detectBeat();
+
+                }
+
 
                 // Calculate the angle for this particle
                 let angle = i * angleIncrement;

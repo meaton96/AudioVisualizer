@@ -21,11 +21,24 @@ const changeStarsDirection = () => {
     stars.forEach(star => {
         star.vx = clamp(Math.random() * starSpeed * 2 - starSpeed, 5);
         star.vy = clamp(Math.random() * starSpeed * 2 - starSpeed, 5);
+
     });
 
 }
+const changeStarsColor = (color) => {
+    stars.forEach(star => {
+        if (color)
+            star.color = color;
+        else if (star.color === '#FFF') {
+            star.color = '#00F';
+        }
+        else {
+            star.color = '#FFF';
+        }
+    });
+}
 const clamp = (value, max) => {
-    if (!value)
+    if (!value || value === 0 || value === NaN)
         return max;
     if (value > max) {
         value = max;
@@ -63,7 +76,7 @@ class Star {
         this.canvasWidth = canvasWidth;
     }
     move = (deviation) => {
-        this.x += this.vx * (1 + deviation); 
+        this.x += this.vx * (1 + deviation);
         this.y += this.vy * (1 + deviation);
         if (this.x > this.canvasWidth * 2) {
             this.x = -this.canvasWidth;
@@ -80,7 +93,7 @@ class Star {
         this.vx *= starFriction;
         this.vy *= starFriction;
 
-        
+
     }
     draw = () => {
         this.ctx.save();
@@ -91,4 +104,4 @@ class Star {
         this.ctx.restore();
     }
 }
-export { createStars, drawStars, updateStars, changeStarsDirection, stopStars};
+export { createStars, drawStars, updateStars, changeStarsDirection, stopStars, changeStarsColor };

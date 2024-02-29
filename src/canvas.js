@@ -110,6 +110,7 @@ const detectBeat = (val = 1) => {
     beatDetected = true
     beatIntensity = val;
     star.changeStarsDirection();
+
 }
 const alterImage = (params = {}) => {
     // 6 - bitmap manipulation
@@ -258,8 +259,13 @@ const drawAudioVisualizer = (params = {}) => {
 
 
 }
+const detectVeryLoudBeat = (val = 1) => {
+    detectBeat(val);
+    star.changeStarsColor();
+}
+
 const setWaveFormDeviation = (deviation) => {
     frameWaveformDeviation = deviation;
 }
 
-export { setupCanvas, draw, detectBeat, getBeatDetected, setWaveFormDeviation };
+export { setupCanvas, draw, detectBeat, getBeatDetected, setWaveFormDeviation,detectVeryLoudBeat };
