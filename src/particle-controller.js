@@ -1,5 +1,6 @@
 import { Particle } from './particle.js';
 import { detectBeat, getBeatDetected } from './canvas.js';
+import { DEFAULTS } from './audio.js';
 
 let particles = [];
 // Beat tracking parameters
@@ -37,7 +38,7 @@ const updateParticles = (audioData, audioDataWaveform, analyserNode, canvasWidth
                 //twice as loud as the threshold
                 //used for modifying the vignette
                 if (!getBeatDetected() && audioData[i] > particleBeatTracking.audibleThreshold * 2) {
-                    //detectBeat(audioData[i] / 256);
+                    
                     detectBeat();
                 }
 
@@ -48,7 +49,7 @@ const updateParticles = (audioData, audioDataWaveform, analyserNode, canvasWidth
                 pos.y += Math.sin(angle) * particleBeatTracking.spawnRadius;
 
                 // Create and add a new particle 
-                let p = new Particle(pos.x, pos.y, angle, i, Particle.particleControls.baseSpeed, audioData[i] / 256 * Particle.particleControls.baseRadius);
+                let p = new Particle(pos.x, pos.y, angle, i, Particle.particleControls.baseSpeed, audioData[i] / (DEFAULTS.numSamples - 1) * Particle.particleControls.baseRadius);
                 
                 particles.push(p);
 

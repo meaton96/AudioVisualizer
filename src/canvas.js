@@ -10,6 +10,7 @@
 import * as utils from './utils.js';
 import * as particleController from './particle-controller.js';
 import *  as star from './star.js';
+import { DEFAULTS } from './audio.js';
 
 let ctx, canvasWidth, canvasHeight, gradient, analyserNode, audioData, audioDataWaveform;
 
@@ -193,8 +194,8 @@ const drawAudioVisualizer = (params = {}) => {
         ctx.fillStyle = 'rgba(0,255,0,0.50)';
         ctx.strokeStyle = 'rgba(0,255,0,0.75)';
         for (let i = 0; i < audioData.length; i++) {
-            ctx.fillRect(margin + i * (barWidth + barSpacing), topSpacing + 256 - audioData[i], barWidth, barHeight);
-            ctx.strokeRect(margin + i * (barWidth + barSpacing), topSpacing + 256 - audioData[i], barWidth, barHeight);
+            ctx.fillRect(margin + i * (barWidth + barSpacing), topSpacing + DEFAULTS.numSamples - audioData[i], barWidth, barHeight);
+            ctx.strokeRect(margin + i * (barWidth + barSpacing), topSpacing + DEFAULTS.numSamples - audioData[i], barWidth, barHeight);
         }
         ctx.restore();
     }
@@ -205,7 +206,7 @@ const drawAudioVisualizer = (params = {}) => {
         ctx.save();
         ctx.globalAlpha = 0.5;
         for (let i = 0; i < audioData.length; i++) {
-            let percent = audioData[i] / 255;
+            let percent = audioData[i] / (DEFAULTS.numSamples - 1);
 
             let circleRadius = percent * maxRadius;
             ctx.beginPath();

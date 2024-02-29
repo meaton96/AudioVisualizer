@@ -6,7 +6,7 @@ let audioCtx;
 let element, sourceNode, analyserNode, gainNode, bassNode, trebleNode;
 
 // 3 - here we are faking an enumeration
-const DEFAULTS = Object.freeze({
+export const DEFAULTS = Object.freeze({
     gain: 0.5,
     numSamples: 256
 });
