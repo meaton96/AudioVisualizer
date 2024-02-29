@@ -29,6 +29,8 @@ const updateParticles = (audioData, audioDataWaveform, analyserNode, canvasWidth
        // console.log(Particle.frequencyResponsivenessAdjusted);
         // Iterate through all the bins of the frequency data
         for (let i = 0; i < audioData.length; i++) {
+            if (i === 0)
+                console.log(audioData[i]);
             // Check if the frequency value exceeds the audible threshold
             if (audioData[i] > particleBeatTracking.audibleThreshold) {
 

@@ -50,7 +50,7 @@ const init = () => {
 }
 const updateParticleHueControl = (type, value) => {
   let varType = type === 'min' ? 'minHue' : 'maxHue';
-  Particle.defaultParticleControls[varType] = parseInt(value); // Update the hue value in particle controls
+  Particle.particleControls[varType] = parseInt(value); // Update the hue value in particle controls
   //console.log(`#${type}-number`);
   document.querySelector(`#${type}-hue-number`).value = value; // Synchronize number input
   document.querySelector(`#${type}-hue`).value = value; // Synchronize range slider

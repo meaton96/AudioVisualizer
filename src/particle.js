@@ -22,8 +22,8 @@ export class Particle {
         this.y = y;            // y-coordinate              
         this.radius = radius;   // radius
         this.speed = speed;         // speed
-        const hueRange = Particle.defaultParticleControls.maxHue - Particle.defaultParticleControls.minHue;
-        const hue = Particle.defaultParticleControls.minHue + (angle / Math.PI * 180) * (hueRange / 360);
+        const hueRange = Particle.particleControls.maxHue - Particle.particleControls.minHue;
+        const hue = Particle.particleControls.minHue + (angle / Math.PI * 180) * (hueRange / 360);
         this.color = `hsl(${hue}, 100%, 50%)`;
         //this.color = `hsl(${angle / Math.PI * 180}, 100%, 50%`; // color
         this.angle = angle;     // angle            

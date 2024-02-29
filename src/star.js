@@ -19,10 +19,21 @@ const createStars = (count, canvasWidth, canvasHeight, ctx) => {
 
 const changeStarsDirection = () => {
     stars.forEach(star => {
-        star.vx = Math.random() * starSpeed * 2 - starSpeed;
-        star.vy = Math.random() * starSpeed * 2 - starSpeed;
+        star.vx = clamp(Math.random() * starSpeed * 2 - starSpeed, 5);
+        star.vy = clamp(Math.random() * starSpeed * 2 - starSpeed, 5);
     });
 
+}
+const clamp = (value, max) => {
+    if (!value)
+        return max;
+    if (value > max) {
+        value = max;
+    }
+    else if (value < -max) {
+        value = -max;
+    }
+    return value;
 }
 const drawStars = () => {
     for (let i = 0; i < stars.length; i++) {
