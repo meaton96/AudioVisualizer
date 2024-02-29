@@ -12,7 +12,8 @@ let particleBeatTracking = {
     beatDecayRate: 0.9,
     beatMin: .15,
     audibleThreshold: 120,
-    bassEndBin: 5 
+    bassEndBin: 5,
+    veryLoudBeat: 251
 };
 // Update the particles based on the audio data
 const updateParticles = (audioData, audioDataWaveform, analyserNode, canvasWidth, canvasHeight, ctx) => {
@@ -27,21 +28,21 @@ const updateParticles = (audioData, audioDataWaveform, analyserNode, canvasWidth
     //use average to spawn particles
     if (average > particleBeatTracking.beatCutOff && average > particleBeatTracking.beatMin) {
         Particle.frequencyResponsivenessAdjusted = Particle.particleControls.frequencyResponsiveness + ((average - 230) / 100);
-       // console.log(Particle.frequencyResponsivenessAdjusted);
+        // console.log(Particle.frequencyResponsivenessAdjusted);
         // Iterate through all the bins of the frequency data
         for (let i = 0; i < audioData.length; i++) {
-            if (i === 0)
-                console.log(audioData[i]);
+
             // Check if the frequency value exceeds the audible threshold
             if (audioData[i] > particleBeatTracking.audibleThreshold) {
 
-                //twice as loud as the threshold
-                //used for modifying the vignette
-                if (!getBeatDetected() && audioData[i] > 253) {
+
+                if (!getBeatDetected() && audioData[i] > Particle.particleControls.veryLoudBeat) {
                     detectVeryLoudBeat();
-                    
+
                 }
-                else if (audioData[i] > particleBeatTracking.audibleThreshold * 2) {
+                else if (average > particleBeatTracking.audibleThreshold * 2) {
+                    //twice as loud as the threshold
+                    //used for modifying the vignette
                     detectBeat();
 
                 }
@@ -55,7 +56,7 @@ const updateParticles = (audioData, audioDataWaveform, analyserNode, canvasWidth
 
                 // Create and add a new particle 
                 let p = new Particle(pos.x, pos.y, angle, i, Particle.particleControls.baseSpeed, audioData[i] / (DEFAULTS.numSamples - 1) * Particle.particleControls.baseRadius);
-                
+
                 particles.push(p);
 
             }
@@ -84,7 +85,7 @@ const updateParticles = (audioData, audioDataWaveform, analyserNode, canvasWidth
 
         // Remove the particle if it's no longer visible
         if (p.alpha <= p.alphaFadePerFrame || p.radius <= -p.radiusGrowthPerFrame) {
-            
+
             particles.splice(index, 1);
         }
     });

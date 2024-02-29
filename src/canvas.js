@@ -87,10 +87,6 @@ const draw = (params = {}) => {
     beatDetected = false;
     drawAudioVisualizer(params);
 
-
-
-
-
     if (params.showVignette)
         drawVignette(beatIntensity);
     if (!beatDetected) {
