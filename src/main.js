@@ -25,7 +25,8 @@ const drawParams = {
   showParticles: true,
   showLine: true,
   showVignette: true,
-  showStars: true
+  showStars: true,
+  showTunnel: true
 };
 const particleControls = Particle.particleControls;
 

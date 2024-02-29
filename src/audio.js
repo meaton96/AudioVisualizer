@@ -1,3 +1,4 @@
+
 // 1 - our WebAudio context, **we will export and make this public at the bottom of the file**
 let audioCtx;
 
@@ -52,16 +53,16 @@ const setupWebAudio = (filePath) => {
     gainNode = audioCtx.createGain();
     gainNode.gain.value = DEFAULTS.gain;
 
-    
+
     bassNode = audioCtx.createBiquadFilter();
     bassNode.type = "lowshelf";
     bassNode.frequency.value = 300;
     bassNode.gain.value = 0;
 
     trebleNode = audioCtx.createBiquadFilter();
-    trebleNode.type = 'highshelf'; 
-    trebleNode.frequency.value = 3000; 
-    trebleNode.gain.value = 0; 
+    trebleNode.type = 'highshelf';
+    trebleNode.frequency.value = 3000;
+    trebleNode.gain.value = 0;
 
     // 8 - connect the nodes - we now have an audio graph
     sourceNode.connect(bassNode);
@@ -70,6 +71,7 @@ const setupWebAudio = (filePath) => {
     analyserNode.connect(gainNode);
     gainNode.connect(audioCtx.destination);
 }
+
 const loadSoundFile = (filePath) => {
     element.src = filePath;
 }
@@ -98,6 +100,8 @@ const removeBassFilter = () => {
 }
 
 
-export {audioCtx, setupWebAudio, playCurrentSound, pauseCurrentSound, loadSoundFile, setVolume, setTrebleFilter, setBassFilter, removeBassFilter, removeTrebleFilter, analyserNode};
+
+
+export { audioCtx, setupWebAudio, playCurrentSound, pauseCurrentSound, loadSoundFile, setVolume, setTrebleFilter, setBassFilter, removeBassFilter, removeTrebleFilter, analyserNode };
 
 

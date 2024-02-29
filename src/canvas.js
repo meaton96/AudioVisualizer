@@ -21,6 +21,20 @@ let beatDetected = false;
 let beatIntensity = 1;
 let frameWaveformDeviation = 0;
 
+let tunnelCenterX;
+let tunnelCenterY;
+let tunnelRadius;
+let tunnelRadiusScalar = 1.5;
+let tunnelSpeed = 4; // Speed of the tunnel movement
+let colorStops = [
+    { percent: 0, color: "#87CEFA" },
+    { percent: 0.2, color: "#E6E6FA" },
+    { percent: 0.4, color: "#D8BFD8" },
+    { percent: 0.6, color: "#FFDDF4" },
+    { percent: 0.8, color: "#FFE4E1" },
+    { percent: 1, color: "#87CEFA" }
+]; // Array of color stops for the gradient
+
 
 const setupCanvas = (canvasElement, analyserNodeRef) => {
     // create drawing context
@@ -28,8 +42,12 @@ const setupCanvas = (canvasElement, analyserNodeRef) => {
 
     canvasWidth = canvasElement.width;
     canvasHeight = canvasElement.height;
+    tunnelCenterX = canvasWidth / 2; // Initial center X position
+    tunnelCenterY = canvasHeight / 2; // Initial center Y position
+    tunnelRadius = Math.min(canvasWidth, canvasHeight) * tunnelRadiusScalar; // Initial tunnel radius
     // create a gradient that runs top to bottom
     gradient = utils.getLinearGradient(ctx, 0, 0, 0, canvasHeight, [{ percent: 0, color: "#87CEFA" }, { percent: .25, color: "#E6E6FA" }, { percent: .5, color: "#D8BFD8" }, { percent: .75, color: "#FFDDF4" }, { percent: 1, color: "#FFE4E1" }]);
+    
     // keep a reference to the analyser node
     analyserNode = analyserNodeRef;
     // this is the array where the analyser data will be stored
@@ -77,6 +95,19 @@ const draw = (params = {}) => {
     else {
         analyserNode.getByteFrequencyData(audioData);
     }
+    if (params.showTunnel && audioData && audioData[0] != 0)
+        updateTunnelGradient(audioData);
+    
+
+
+    if (params.showGradient) {
+        // Draw the dynamic gradient background
+        ctx.save();
+        ctx.fillStyle = gradient;
+        ctx.globalAlpha = params.showWaveform ? 1 : 0.5;
+        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+        ctx.restore();
+    }
 
 
     if (params.showStars) {
@@ -98,6 +129,42 @@ const draw = (params = {}) => {
 
 
 }
+const updateTunnelGradient = (audioData) => {
+    // Move the tunnel center
+    // tunnelCenterX += tunnelSpeed;
+    //  tunnelCenterY += tunnelSpeed;
+    const getAverageValues = (audioData) => {
+        const sum = audioData.reduce((acc, val) => acc + val, 0);
+        const average = sum / audioData.length;
+        return average;
+    };
+
+    const averageValues = getAverageValues(audioData);
+    const percentSpeed = tunnelSpeed * (averageValues / DEFAULTS.numSamples);
+
+    
+
+
+    // Update the color stops to create a dynamic gradient
+    
+    colorStops.forEach(stop => {
+        stop.percent += 0.01  * percentSpeed; // Increase the stop position
+        if (stop.percent > 1) {
+            stop.percent -= 1; // Loop back to the beginning if the stop exceeds 1
+        }
+    });
+
+    // Create a radial gradient centered at the tunnel center
+    gradient = ctx.createRadialGradient(
+        tunnelCenterX, tunnelCenterY, 0,
+        tunnelCenterX, tunnelCenterY, tunnelRadius
+    );
+
+    // Add the color stops to the gradient
+    colorStops.forEach(stop => {
+        gradient.addColorStop(stop.percent, stop.color);
+    });
+};
 //gradually reduce the beat intensity
 const fadeVignette = (vignetteFadeSpeed) => {
     beatIntensity = Math.max(0, beatIntensity - vignetteFadeSpeed); // Gradually decrease
@@ -169,13 +236,13 @@ const drawAudioVisualizer = (params = {}) => {
     ctx.restore();
 
     // 3 - draw gradient
-    if (params.showGradient) {
-        ctx.save();
-        ctx.fillStyle = gradient;
-        ctx.globalAlpha = params.showWaveform ? 1 : .5;
-        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-        ctx.restore();
-    }
+    // if (params.showGradient) {
+    //     ctx.save();
+    //     ctx.fillStyle = gradient;
+    //     ctx.globalAlpha = params.showWaveform ? 1 : .5;
+    //     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+    //     ctx.restore();
+    // }
     // 4 - draw bars
 
     if (params.showBars) {
@@ -264,4 +331,4 @@ const setWaveFormDeviation = (deviation) => {
     frameWaveformDeviation = deviation;
 }
 
-export { setupCanvas, draw, detectBeat, getBeatDetected, setWaveFormDeviation,detectVeryLoudBeat };
+export { setupCanvas, draw, detectBeat, getBeatDetected, setWaveFormDeviation, detectVeryLoudBeat };
