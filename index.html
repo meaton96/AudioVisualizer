@@ -11,7 +11,7 @@
 
 <body>
   <main>
-    
+
     <canvas width="1066" height="600"></canvas>
 
     <div id="controls">
@@ -32,6 +32,13 @@
           <option value="media/ftw.mp3">FTW - Monstercat</option>
           <option value="media/no-tears.mp3">No Tears Left To Cry - Ariana Grande</option>
           <option value="media/moments.mp3">The Moments I'm Missing - White Noise & Ranji</option>
+          <option value="media/opus.mp3">Opus - Eric Prydz</option>
+          <option value="media/bury-a-friend.mp3">Bury a Friend - Billie Ellish (Zeds dead Remix)</option>
+          <option value="media/lost-in-space.mp3">Lost in Space - Infected Mushroom</option>
+          <option value="media/surface.mp3">Surface - Aero Cloud</option>
+          <option value="media/dont-leave.mp3">Don't Leave - Seven Lions</option>
+          <option value="media/one-more-time.mp3">One More Time - Daft Punk</option>
+          <option value="media/raccoon.mp3">Raccoon City - Aether & Sizzlebird</option>
         </select>
       </label>
     </section>
@@ -46,9 +53,26 @@
     <div id="control-particles">
       <section>
         <h1>Particle Control</h1>
-        
-        <span><input type="checkbox" id="cb-particles" checked><label for="cb-particles">Show Particles</label></span>
 
+        <span><input type="checkbox" id="cb-particles" checked><label for="cb-particles">Show Particles</label></span>
+        <div id="particle-controls">
+          <div id="color-chooser">
+            <!-- Existing controls... -->
+            <div>
+              <label for="min-hue">Min Hue:</label>
+              <input type="range" id="min-hue" min="0" max="360" value="0">
+              <input type="number" id="min-hue-number" min="0" max="360" value="0">
+            </div>
+            <div>
+              <label for="max-hue">Max Hue:</label>
+              <input type="range" id="max-hue" min="0" max="360" value="360">
+              <input type="number" id="max-hue-number" min="0" max="360" value="360">
+            </div>
+          </div>
+
+          <!-- Additional controls... -->
+        </div>
+        
       </section>
     </div>
 
@@ -77,9 +101,9 @@
         <span><input type="checkbox" id="cb-waveform"><label for="cb-waveform">Show Waveform</label></span>
         <span><input type="checkbox" id="cb-stars" checked><label for="cb-stars">Show Stars</label></span>
         <span><input type="checkbox" id="cb-vignette" checked><label for="cb-vignette">Show Vignette</label></span>
-    </div>
+      </div>
 
-    
+
 
 
 

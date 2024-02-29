@@ -9,13 +9,16 @@
 
 import * as utils from './utils.js';
 import * as particleController from './particle-controller.js';
+import *  as star from './star.js';
 
 let ctx, canvasWidth, canvasHeight, gradient, analyserNode, audioData, audioDataWaveform;
 
-let stars = [];
 
-let vignetteFadeSpeed = .02;
 
+let vignetteFadeSpeed = .025;
+let beatDetected = false;
+let beatIntensity = 1;
+let frameWaveformDeviation = 0;
 
 
 const setupCanvas = (canvasElement, analyserNodeRef) => {
@@ -31,19 +34,20 @@ const setupCanvas = (canvasElement, analyserNodeRef) => {
     // this is the array where the analyser data will be stored
     audioData = new Uint8Array(analyserNode.fftSize / 2);
     audioDataWaveform = new Uint8Array(analyserNode.fftSize / 2);
-    createStars(500);
+    star.createStars(2000, canvasWidth, canvasHeight, ctx);
 
 }
+const getBeatDetected = () => { return beatDetected; }
 
 function drawVignette(beatIntensity) {
     // Determine the inner radius based on the beat intensity
     // The more intense the beat, the larger the inner radius (less vignette)
     let baseInnerRadius = canvasWidth / 4; // Adjust based on your canvas size and preferences
-    let innerRadius = baseInnerRadius + (beatIntensity * 50); // Increase radius based on beat intensity
+    let innerRadius = baseInnerRadius + (beatIntensity * 40); // Increase radius based on beat intensity
 
     // Determine the opacity based on the beat intensity
     // The more intense the beat, the less opaque the vignette
-    let baseOpacity = 0.8; // Adjust based on your preferences
+    let baseOpacity = 0.9; // Adjust based on your preferences
     let opacity = Math.max(0, baseOpacity - (beatIntensity * 0.2)); // Decrease opacity based on beat intensity
 
     // Create the gradient for the vignette effect
@@ -58,26 +62,8 @@ function drawVignette(beatIntensity) {
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
     ctx.restore();
 }
-const createStars = (count) => {
-    for (let i = 0; i < count; i++) {
-        stars.push({
-            x: Math.random() * canvasWidth,
-            y: Math.random() * canvasHeight,
-            size: Math.random() * 1.5
-        });
-    }
-}
 
-const drawStars = () => {
-    stars.forEach(star => {
-        ctx.save();
-        ctx.fillStyle = '#FFF'; // Star color
-        ctx.beginPath();
-        ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-    });
-}
+
 
 
 const draw = (params = {}) => {
@@ -90,27 +76,39 @@ const draw = (params = {}) => {
     else {
         analyserNode.getByteFrequencyData(audioData);
     }
-    particleController.resetBeatDetection();
 
-    if (params.showStars)
-        drawStars();
 
+    if (params.showStars) {
+        star.updateStars(frameWaveformDeviation);
+        star.drawStars();
+    }
+
+    beatDetected = false;
     drawAudioVisualizer(params);
 
 
 
-    if (!particleController.beatDetected) { // Assuming you have a way to detect beats
-        particleController.fadeVignette(vignetteFadeSpeed);
-    }
+
 
     if (params.showVignette)
-        drawVignette(particleController.beatIntensity);
-
+        drawVignette(beatIntensity);
+    if (!beatDetected) {
+        fadeVignette(vignetteFadeSpeed);
+    }
 
 
     alterImage(params);
 
 
+}
+//gradually reduce the beat intensity
+const fadeVignette = (vignetteFadeSpeed) => {
+    beatIntensity = Math.max(0, beatIntensity - vignetteFadeSpeed); // Gradually decrease
+}
+const detectBeat = (val = 1) => {
+    beatDetected = true
+    beatIntensity = val;
+    star.changeStarsDirection();
 }
 const alterImage = (params = {}) => {
     // 6 - bitmap manipulation
@@ -233,7 +231,7 @@ const drawAudioVisualizer = (params = {}) => {
         ctx.restore();
     }
     if (params.showParticles) {
-        particleController.updateParticles(audioData, audioDataWaveform, analyserNode,canvasWidth, canvasHeight, ctx);
+        particleController.updateParticles(audioData, audioDataWaveform, analyserNode, canvasWidth, canvasHeight, ctx);
     }
     if (params.showLine) {
         let margin = 4; // Margin from the bottom of the canvas
@@ -259,5 +257,8 @@ const drawAudioVisualizer = (params = {}) => {
 
 
 }
+const setWaveFormDeviation = (deviation) => {
+    frameWaveformDeviation = deviation;
+}
 
-export { setupCanvas, draw };
+export { setupCanvas, draw, detectBeat, getBeatDetected, setWaveFormDeviation };

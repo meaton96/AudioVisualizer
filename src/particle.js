@@ -1,8 +1,8 @@
-
+import { setWaveFormDeviation } from './canvas.js'
 // particle.js
 export class Particle {
 
-    static particleControls = {
+    static defaultParticleControls = {
         angularVelocity: .01,
         friction: 0.995,
         alphaFadePerFrame: .002,
@@ -10,17 +10,22 @@ export class Particle {
         speedMultiplier: 1,
         frequencyResponsiveness: 1,
         baseRadius: 10,
-        baseSpeed: 2.5
-    
-    } 
-
+        baseSpeed: 2.5,
+        minHue: 0,    
+        maxHue: 360 
+    };
+    static particleControls = { ...Particle.defaultParticleControls };
+    static frequencyResponsivenessAdjusted = 1;
 
     constructor(x, y, angle, frequencyBin, speed = 2.5, radius = 5) {
         this.x = x;             // x-coordinate                 
         this.y = y;            // y-coordinate              
         this.radius = radius;   // radius
         this.speed = speed;         // speed
-        this.color = `hsl(${angle / Math.PI * 180}, 100%, 50%`; // color
+        const hueRange = Particle.defaultParticleControls.maxHue - Particle.defaultParticleControls.minHue;
+        const hue = Particle.defaultParticleControls.minHue + (angle / Math.PI * 180) * (hueRange / 360);
+        this.color = `hsl(${hue}, 100%, 50%)`;
+        //this.color = `hsl(${angle / Math.PI * 180}, 100%, 50%`; // color
         this.angle = angle;     // angle            
         this.frequencyBin = frequencyBin;       // frequencyBin 0-255
         this.angularVelocity = Particle.particleControls.angularVelocity;              // angular velocity
@@ -41,13 +46,10 @@ export class Particle {
             this.handleRunaway();
         }
         else {
-            //no divinding by 0
-            if (Particle.particleControls.frequencyResponsiveness === 0) {
-                console.error("frequencyResponsiveness is 0");
-                return;
-            }
+
             // Calculate deviation from center (128) of waveformValue
-            let deviation = (waveformValue - 128) / (32 * Particle.particleControls.frequencyResponsiveness);
+            let deviation = (waveformValue - 128) / (32 / (Particle.frequencyResponsivenessAdjusted ?? 1));
+            setWaveFormDeviation(deviation);
 
 
             this.move(deviation);
@@ -60,7 +62,7 @@ export class Particle {
     //handle moving the particle
     move = (deviation) => {
         // Use waveform deviation to alter the particle's speed and direction
-        this.x += this.vx * (1 + deviation); 
+        this.x += this.vx * (1 + deviation);
         this.y += this.vy * (1 + deviation);
 
         this.angle += this.angularVelocity * (1 + Math.abs(deviation));

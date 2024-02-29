@@ -10,7 +10,9 @@
 import * as utils from './utils.js';
 import * as audio from './audio.js';
 import * as canvas from './canvas.js';
+import { Particle } from './particle.js';
 import * as particleController from './particle-controller.js';
+import * as star from './star.js';
 
 const drawParams = {
   showGradient: true,
@@ -25,7 +27,7 @@ const drawParams = {
   showVignette: true,
   showStars: true
 };
-
+const particleControls = Particle.particleControls;
 
 
 // 1 - here we are faking an enumeration
@@ -37,7 +39,7 @@ const init = () => {
   console.log("init called");
 
   audio.setupWebAudio(DEFAULTS.sound1);
-  
+
 
   //console.log(`Testing utils.getRandomColor() import: ${utils.getRandomColor()}`);
   let canvasElement = document.querySelector("canvas"); // hookup <canvas> element
@@ -45,6 +47,13 @@ const init = () => {
   canvas.setupCanvas(canvasElement, audio.analyserNode);
   loop();
 
+}
+const updateParticleHueControl = (type, value) => {
+  let varType = type === 'min' ? 'minHue' : 'maxHue';
+  Particle.defaultParticleControls[varType] = parseInt(value); // Update the hue value in particle controls
+  //console.log(`#${type}-number`);
+  document.querySelector(`#${type}-hue-number`).value = value; // Synchronize number input
+  document.querySelector(`#${type}-hue`).value = value; // Synchronize range slider
 }
 
 const setupUI = (canvasElement) => {
@@ -56,13 +65,107 @@ const setupUI = (canvasElement) => {
 
   setupCheckboxes();
 
-
+  createParticleControls();
 
 
   //add .onclick event to button
 
 
 } // end setupUI
+
+const updateParticleControl = (key, value) => {
+  Particle.particleControls[key] = parseFloat(value); // Update the static property
+
+}
+const resetParticleControls = () => {
+  // Reset the values
+  Object.keys(Particle.defaultParticleControls).forEach(key => {
+    Particle.particleControls[key] = Particle.defaultParticleControls[key];
+
+    // Update the corresponding slider and input field
+    const slider = document.getElementById(key);
+    const input = document.getElementById(`${key}-input`);
+    if (slider && input) {
+      slider.value = Particle.defaultParticleControls[key];
+      input.value = Particle.defaultParticleControls[key];
+    }
+  });
+}
+
+const createParticleControls = () => {
+  const container = document.querySelector('#particle-controls');
+
+  Object.keys(particleControls).forEach(key => {
+    // Create a label for the control
+    const label = document.createElement('label');
+    label.innerHTML = `${key}: `;
+    label.for = key;
+
+    // Create a slider for the control
+    const slider = document.createElement('input');
+    slider.type = 'range';
+    slider.id = key;
+    slider.value = particleControls[key];
+    // Define min, max, and step values as needed for each control
+    slider.min = 0;
+    slider.max = key.includes('alpha') || key.includes('velocity') ? 0.1 : 10; // Adjust based on your range needs
+    slider.step = key.includes('alpha') || key.includes('velocity') ? 0.001 : 0.1;
+
+    // Create an input field for the control
+    const input = document.createElement('input');
+    input.type = 'number';
+    input.value = particleControls[key];
+    input.step = slider.step; // Align step values with the slider
+    input.id = `${key}-input`;
+
+    // Update the particle control and the corresponding input field when the slider value changes
+    slider.oninput = (e) => {
+      const value = e.target.value;
+      input.value = value;
+      updateParticleControl(key, value);
+    };
+
+    // Update the particle control and the corresponding slider when the input field value changes
+    input.oninput = (e) => {
+      const value = e.target.value;
+      slider.value = value;
+      updateParticleControl(key, value);
+    };
+
+    // Append the controls to the container
+    container.appendChild(label);
+    container.appendChild(slider);
+    container.appendChild(input);
+    container.appendChild(document.createElement('br')); // For layout, to put each control on a new line
+  });
+
+  // Create and append the reset button
+  const resetButton = document.createElement('button');
+  resetButton.textContent = 'Reset to Default';
+  resetButton.onclick = resetParticleControls; // Set the click event to reset the controls
+  container.appendChild(resetButton); // Append the reset button to the container
+
+  // Event listeners for the hue range controls
+  document.querySelector('#min-hue').addEventListener('input', (e) => {
+    updateParticleHueControl('min', e.target.value);
+  });
+
+  document.querySelector('#max-hue').addEventListener('input', (e) => {
+    updateParticleHueControl('max', e.target.value);
+  });
+
+  document.querySelector('#min-hue-number').addEventListener('input', (e) => {
+    updateParticleHueControl('min', e.target.value);
+  });
+
+  document.querySelector('#max-hue-number').addEventListener('input', (e) => {
+    updateParticleHueControl('max', e.target.value);
+  });
+
+
+}
+
+
 
 const setupVolumeSilder = () => {
   // B - hookup volume slider
@@ -98,11 +201,13 @@ const setupButtons = (canvasElement) => {
     if (e.target.dataset.playing == "no") {
       // if track is currently paused, play it
       particleController.clearParticles();
+      star.stopStars();
       audio.playCurrentSound();
       e.target.dataset.playing = "yes";
     } else {
       // if track is currently playing, pause it
       particleController.clearParticles();
+      star.stopStars();
       audio.pauseCurrentSound();
       e.target.dataset.playing = "no";
     }
@@ -118,7 +223,7 @@ const setupButtons = (canvasElement) => {
     }
   };
 
- 
+
 }
 
 

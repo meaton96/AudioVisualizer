@@ -1,6 +1,6 @@
 import { Particle } from './particle.js';
-let beatIntensity = 0;
-let beatDetected = false;
+import { detectBeat, getBeatDetected } from './canvas.js';
+
 let particles = [];
 // Beat tracking parameters
 let particleBeatTracking = {
@@ -11,7 +11,7 @@ let particleBeatTracking = {
     beatDecayRate: 0.9,
     beatMin: .15,
     audibleThreshold: 120,
-    bassEndBin: 5,
+    bassEndBin: 5 
 };
 // Update the particles based on the audio data
 const updateParticles = (audioData, audioDataWaveform, analyserNode, canvasWidth, canvasHeight, ctx) => {
@@ -22,29 +22,32 @@ const updateParticles = (audioData, audioDataWaveform, analyserNode, canvasWidth
     }
     let average = sum / particleBeatTracking.bassEndBin;
     let angleIncrement = (Math.PI * 2) / (analyserNode.fftSize / 2.35);
-
+    //console.log(average);
     //use average to spawn particles
     if (average > particleBeatTracking.beatCutOff && average > particleBeatTracking.beatMin) {
+        Particle.frequencyResponsivenessAdjusted = Particle.particleControls.frequencyResponsiveness + ((average - 230) / 100);
+       // console.log(Particle.frequencyResponsivenessAdjusted);
         // Iterate through all the bins of the frequency data
         for (let i = 0; i < audioData.length; i++) {
             // Check if the frequency value exceeds the audible threshold
             if (audioData[i] > particleBeatTracking.audibleThreshold) {
 
-                //50% loader than base threshold
+                //twice as loud as the threshold
                 //used for modifying the vignette
-                if (!beatDetected && audioData[i] > particleBeatTracking.audibleThreshold * 2) {
-                    beatDetected = true;
-                    beatIntensity = audioData[i] / 256;
+                if (!getBeatDetected() && audioData[i] > particleBeatTracking.audibleThreshold * 2) {
+                    //detectBeat(audioData[i] / 256);
+                    detectBeat();
                 }
 
                 // Calculate the angle for this particle
                 let angle = i * angleIncrement;
                 let pos = { x: canvasWidth / 2, y: canvasHeight / 2 };
                 pos.x += Math.cos(angle) * particleBeatTracking.spawnRadius; //radius of spawn from center
-                pos.y += Math.sin(angle) * particleBeatTracking.spawnRadius; 
+                pos.y += Math.sin(angle) * particleBeatTracking.spawnRadius;
 
                 // Create and add a new particle 
                 let p = new Particle(pos.x, pos.y, angle, i, Particle.particleControls.baseSpeed, audioData[i] / 256 * Particle.particleControls.baseRadius);
+                
                 particles.push(p);
 
             }
@@ -72,12 +75,8 @@ const updateParticles = (audioData, audioDataWaveform, analyserNode, canvasWidth
         p.draw(ctx);
 
         // Remove the particle if it's no longer visible
-
-        //  p.move();
-        //p.updateBasedOnMusic(audioData);
-        //   p.draw(ctx);
         if (p.alpha <= p.alphaFadePerFrame || p.radius <= -p.radiusGrowthPerFrame) {
-
+            
             particles.splice(index, 1);
         }
     });
@@ -88,14 +87,7 @@ const clearParticles = () => {
         p.runaway = true;
     });
 };
-//reset the beat detection for vignette
-const resetBeatDetection = () => {
-    beatDetected = false;
-    beatIntensity = 0;
-};
-//gradually reduce the beat intensity
-const fadeVignette = (vignetteFadeSpeed) => {
-    beatIntensity = Math.max(0, beatIntensity - vignetteFadeSpeed); // Gradually decrease
-}
 
-export { updateParticles, clearParticles, resetBeatDetection,fadeVignette, beatDetected, beatIntensity };
+
+
+export { updateParticles, clearParticles };
