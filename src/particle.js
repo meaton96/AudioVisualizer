@@ -11,6 +11,7 @@ export class Particle {
         frequencyResponsiveness: 1
     
     } 
+    
 
     constructor(x, y, angle, frequencyBin, speed = 2.5, radius = 5) {
         this.x = x;             // x-coordinate                 
