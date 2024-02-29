@@ -15,6 +15,15 @@ body {
   #controls{
     margin-left: 1rem;
   }
+  #checkboxes {
+    width: 60%;
+    display: flex;
+    justify-content: space-between;
+    background: #444242;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-top: 1rem;
+  }
   
   #label-volume{
     margin-left: 1rem;
@@ -40,4 +49,20 @@ body {
   #btn-fs{
     font-size: 1.2rem;
     width: 8rem;
+  }
+  main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .control-column {
+    display: flex;
+    flex-direction: column;
+  }
+  #control-particles {
+    background: #444242;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    width: 60%;
+    text-align: center;
   }

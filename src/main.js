@@ -19,8 +19,13 @@ const drawParams = {
   showInvert: false,
   showEmboss: false,
   showWaveform: false,
-  showParticles: true
+  showParticles: true,
+  showLine: true,
+  showVignette: true,
+  showStars: true
 };
+
+
 
 // 1 - here we are faking an enumeration
 const DEFAULTS = Object.freeze({
@@ -31,6 +36,7 @@ const init = () => {
   console.log("init called");
 
   audio.setupWebAudio(DEFAULTS.sound1);
+  
 
   //console.log(`Testing utils.getRandomColor() import: ${utils.getRandomColor()}`);
   let canvasElement = document.querySelector("canvas"); // hookup <canvas> element
@@ -46,7 +52,7 @@ const setupUI = (canvasElement) => {
 
   setupVolumeSilder();
 
-  
+
   setupCheckboxes();
 
 
@@ -90,10 +96,12 @@ const setupButtons = (canvasElement) => {
     console.log(`audioCtx.state after = ${audio.audioCtx.state}`);
     if (e.target.dataset.playing == "no") {
       // if track is currently paused, play it
+      canvas.clearParticles();
       audio.playCurrentSound();
       e.target.dataset.playing = "yes";
     } else {
       // if track is currently playing, pause it
+      canvas.clearParticles();
       audio.pauseCurrentSound();
       e.target.dataset.playing = "no";
     }
@@ -108,6 +116,8 @@ const setupButtons = (canvasElement) => {
       playButton.dispatchEvent(new MouseEvent("click"));
     }
   };
+
+ 
 }
 
 
@@ -180,14 +190,28 @@ const setupCheckboxes = () => {
   particlesCB.onchange = e => {
     drawParams.showParticles = e.target.checked;
   }
-  
+
+  let lineCB = document.querySelector("#cb-line");
+  lineCB.onchange = e => {
+    drawParams.showLine = e.target.checked;
+  }
+  let vignetteCB = document.querySelector("#cb-vignette");
+  vignetteCB.onchange = e => {
+    drawParams.showVignette = e.target.checked;
+  }
+
+  let starsCB = document.querySelector("#cb-stars");
+  starsCB.onchange = e => {
+    drawParams.showStars = e.target.checked;
+  }
+
 }
 
 const loop = () => {
   setTimeout(() => {
     canvas.draw(drawParams);
     loop();
-  }, 1000 / 60); 
+  }, 1000 / 60);
 
 }
 

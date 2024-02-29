@@ -9,18 +9,26 @@
 
 import * as utils from './utils.js';
 import { Particle } from './particle.js';
-import { audioCtx } from './audio.js';
 
-let ctx, canvasWidth, canvasHeight, gradient, analyserNode, audioData;
-let particles = [];
+let ctx, canvasWidth, canvasHeight, gradient, analyserNode, audioData, audioDataWaveform;
+
 let baseAngle = 0;
+let stars = [];
 
+let vignetteFadeSpeed = .02;
+
+let beatIntensity = 0;
+let beatDetected = false;
+let particles = [];
 let particleBeatTracking = {
+    spawnRadius: 50,
     beatCutOff: 0,
     beatTime: 0,
     beatHoldTime: 2.5,
     beatDecayRate: 0.9,
-    beatMin: 1 // minimum beat cutoff
+    beatMin: .15,
+    audibleThreshold: 120,
+    bassEndBin: 5,
 };
 
 const setupCanvas = (canvasElement, analyserNodeRef) => {
@@ -35,72 +43,52 @@ const setupCanvas = (canvasElement, analyserNodeRef) => {
     analyserNode = analyserNodeRef;
     // this is the array where the analyser data will be stored
     audioData = new Uint8Array(analyserNode.fftSize / 2);
-
+    audioDataWaveform = new Uint8Array(analyserNode.fftSize / 2);
+    createStars(500);
 
 }
 const updateParticles = () => {
     // Compute the sum of the lower frequencies
     let sum = 0;
-    let beatFrequency = 10;
-    for (let i = 0; i < beatFrequency; i++) {
+    for (let i = 0; i < particleBeatTracking.bassEndBin; i++) {
         sum += audioData[i];
     }
-    let average = sum / beatFrequency;
+    let average = sum / particleBeatTracking.bassEndBin;
+    let angleIncrement = (Math.PI * 2) / (analyserNode.fftSize / 2.35);
 
-    // Detect beat if average is greater than beatCutOff
     if (average > particleBeatTracking.beatCutOff && average > particleBeatTracking.beatMin) {
-
-        // Determine the frequency bins that correspond to the melody or significant beats
-
-        const fftSize = analyserNode.fftSize; // This should be set on your analyserNode
-        const sampleRate = 44100; // This is a common sample rate for audio; adjust if yours is different
-
-
-
-        // Define your target frequency range
-        const melodyStartFrequency = 0; // example start frequency in Hz
-        const melodyEndFrequency = 200; // example end frequency in Hz
-
-        // Calculate corresponding bin indexes
-        const melodyStartBin = Math.floor((melodyStartFrequency * fftSize) / sampleRate);
-        const melodyEndBin = Math.floor((melodyEndFrequency * fftSize) / sampleRate);
-
-        let melodySum = 0;
-        for (let i = melodyStartBin; i <= melodyEndBin; i++) {
-            melodySum += audioData[i];
-        }
-        let melodyAverage = melodySum / (melodyEndBin - melodyStartBin + 1);
-
-        if (melodyAverage > particleBeatTracking.beatMin) {
-           // console.log("Prominent beat detected");
-            particles.forEach(p => {
-                //p.swapAngularVelocity();
-            //    p.incrementHue(10);
-               // p.vx *= -1;
-               // p.vy *= -1;
-            });
-        }
-
-        particleBeatTracking.beatCutOff = average * 1.5;
-        let threshhold = 150;
+        // Iterate through all the bins of the frequency data
 
         for (let i = 0; i < audioData.length; i++) {
-            console.log(audioData[i]);
-            // Check if the frequency for this bin is significantly present
-            if (audioData[i] > threshhold) { // Replace 'someThreshold' with your chosen minimum value
-                let angle = (i / audioData.length) * Math.PI * 2 + baseAngle;
-        
+            // console.log(`Frequency bin ${i} has a value of ${audioData[i]}`);
+
+            // Check if the frequency value exceeds the audible threshold
+            if (audioData[i] > particleBeatTracking.audibleThreshold) {
+                //50% loader than base threshold
+                if (!beatDetected && audioData[i] > particleBeatTracking.audibleThreshold * 2) {
+                    console.log("loud beat detected");
+                    beatDetected = true;
+                    beatIntensity = audioData[i] / 256;
+                }
+
+                // Calculate the angle for this particle
+                let angle = i * angleIncrement + baseAngle;
                 let pos = { x: canvasWidth / 2, y: canvasHeight / 2 };
-                pos.x += Math.cos(angle) * 50; // You can adjust the radius here
-                pos.y += Math.sin(angle) * 50; // Same as above
-                
-                // Create a particle for this bin
-                let p = new Particle(pos.x, pos.y, angle); 
+                pos.x += Math.cos(angle) * particleBeatTracking.spawnRadius; // You can adjust the radius here
+                pos.y += Math.sin(angle) * particleBeatTracking.spawnRadius; // Same as above
+
+                // Create and add a new particle for this frequency bin
+                let p = new Particle(pos.x, pos.y, angle, i, 2.5, audioData[i] / 256 * 10);
                 particles.push(p);
+
             }
+
         }
 
+        // particles.forEach(p => p.pulseRadius());
 
+        // Reset beat tracking after spawning particles
+        particleBeatTracking.beatCutOff = average * 1.5;
         particleBeatTracking.beatTime = 0;
 
     } else {
@@ -114,28 +102,105 @@ const updateParticles = () => {
 
     // Update and draw particles
     particles.forEach((p, index) => {
-        p.move();
+        // Map the particle's index to a position in the waveform data
+        let waveformIndex = Math.floor(index * (audioDataWaveform.length / particles.length));
+        let waveformValue = audioDataWaveform[waveformIndex];
+        p.update(waveformValue); // Pass the corresponding waveform value
         p.draw(ctx);
-        if (p.alpha <= 0) {
+
+        // Remove the particle if it's no longer visible
+
+        //  p.move();
+        //p.updateBasedOnMusic(audioData);
+        //   p.draw(ctx);
+        if (p.alpha <= p.alphaFadePerFrame || p.radius <= -p.radiusGrowthPerFrame) {
+
             particles.splice(index, 1);
         }
     });
 };
+const clearParticles = () => {
+    particles.forEach((p, index) => {
+        p.runaway = true;
+        //particles.splice(index, 1);
+
+    });
+
+}
+function drawVignette(beatIntensity) {
+    // Determine the inner radius based on the beat intensity
+    // The more intense the beat, the larger the inner radius (less vignette)
+    let baseInnerRadius = canvasWidth / 4; // Adjust based on your canvas size and preferences
+    let innerRadius = baseInnerRadius + (beatIntensity * 50); // Increase radius based on beat intensity
+
+    // Determine the opacity based on the beat intensity
+    // The more intense the beat, the less opaque the vignette
+    let baseOpacity = 0.8; // Adjust based on your preferences
+    let opacity = Math.max(0, baseOpacity - (beatIntensity * 0.2)); // Decrease opacity based on beat intensity
+
+    // Create the gradient for the vignette effect
+    let outerRadius = Math.max(canvasWidth, canvasHeight) / 2;
+    let gradient = ctx.createRadialGradient(canvasWidth / 2, canvasHeight / 2, innerRadius, canvasWidth / 2, canvasHeight / 2, outerRadius);
+    gradient.addColorStop(0, `rgba(0,0,0,0)`);
+    gradient.addColorStop(1, `rgba(0,0,0,${opacity})`);
+
+    // Apply the vignette effect
+    ctx.save();
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+    ctx.restore();
+}
+const createStars = (count) => {
+    for (let i = 0; i < count; i++) {
+        stars.push({
+            x: Math.random() * canvasWidth,
+            y: Math.random() * canvasHeight,
+            size: Math.random() * 1.5
+        });
+    }
+}
+
+const drawStars = () => {
+    stars.forEach(star => {
+        ctx.save();
+        ctx.fillStyle = '#FFF'; // Star color
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    });
+}
+
 
 const draw = (params = {}) => {
     // 1 - populate the audioData array with the frequency data from the analyserNode
     // notice these arrays are passed "by reference" 
+    analyserNode.getByteTimeDomainData(audioDataWaveform);
     if (params.showWaveform) {
-        analyserNode.getByteTimeDomainData(audioData);
+        audioData = audioDataWaveform;
     }
     else {
         analyserNode.getByteFrequencyData(audioData);
     }
+    beatDetected = false;
+
+    if (params.showStars)
+        drawStars();
 
     drawAudioVisualizer(params);
 
-    alterImage(params);
 
+
+    if (!beatDetected) { // Assuming you have a way to detect beats
+        beatIntensity = Math.max(0, beatIntensity - vignetteFadeSpeed); // Gradually decrease
+    }
+
+    if (params.showVignette)
+        drawVignette(beatIntensity);
+
+
+
+    alterImage(params);
 
 
 }
@@ -203,22 +268,20 @@ const drawAudioVisualizer = (params = {}) => {
     if (params.showGradient) {
         ctx.save();
         ctx.fillStyle = gradient;
-        ctx.globalAlpha = params.showWaveform ? 1 : .3;
+        ctx.globalAlpha = params.showWaveform ? 1 : .5;
         ctx.fillRect(0, 0, canvasWidth, canvasHeight);
         ctx.restore();
     }
     // 4 - draw bars
 
     if (params.showBars) {
-        if (params.showWaveform) {
 
-        }
         let barSpacing = 4;
         let margin = 5;
         let screenWidthForBars = canvasWidth - (audioData.length * barSpacing) - margin * 2;
         let barWidth = screenWidthForBars / audioData.length;
         let barHeight = 200;
-        let topSpacing = params.showWaveform ? 0 : 100;
+        let topSpacing = params.showWaveform ? 0 : 300;
 
         ctx.save();
         ctx.fillStyle = 'rgba(0,255,0,0.50)';
@@ -231,6 +294,7 @@ const drawAudioVisualizer = (params = {}) => {
     }
     // 5 - draw circles
     if (params.showCircles && !params.showWaveform) {
+
         let maxRadius = canvasHeight / 4;
         ctx.save();
         ctx.globalAlpha = 0.5;
@@ -263,6 +327,29 @@ const drawAudioVisualizer = (params = {}) => {
     if (params.showParticles) {
         updateParticles();
     }
+    if (params.showLine) {
+        let margin = 4; // Margin from the bottom of the canvas
+        let height = canvasHeight - margin; // Y position for the line (near the bottom)
+        let width = canvasWidth / audioData.length; // Width of each segment of the line
+
+        ctx.save();
+        ctx.beginPath();
+        // Start from the bottom left, offset by the first audio data point
+        ctx.moveTo(0, height - audioData[0]); // Adjust Y position based on audio data
+
+        ctx.strokeStyle = utils.makeColor(255, 255, 255, 1);
+        ctx.lineWidth = 3;
+
+        for (let i = 1; i < audioData.length; i++) {
+            // Draw line segments along the bottom of the screen
+            ctx.lineTo(i * width, height - audioData[i]); // Adjust X and Y positions
+        }
+        // Do not close the path to avoid drawing a line back to the start point
+        ctx.stroke(); // Apply the stroke to the path
+        ctx.restore();
+    }
+
+
 }
 
-export { setupCanvas, draw };
+export { setupCanvas, draw, clearParticles };

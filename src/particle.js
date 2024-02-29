@@ -1,80 +1,110 @@
-import * as utils from './utils.js';
+
 // particle.js
 export class Particle {
-    constructor(x, y, angle, speed = 2, radius = 8) {
-        this.x = x;
-        this.y = y;
-        this.changeBeat = false;
-        this.radius = radius;
-        this.speed = speed;
-        this.color = `hsl(${angle / Math.PI * 180}, 100%, 50%`;
-        this.angle = angle;
-        this.angularVelocity = .01;
-        //console.log(angle);
-        // Convert angle to radians for velocity calculation
-        // let radians = angle * Math.PI / 180;
-        // Adjust speed if necessary
-        this.vx = Math.cos(angle) * speed;
-        this.vy = Math.sin(angle) * speed;
+
+    static particleControls = {
+        angularVelocity: .01,
+        friction: 0.995,
+        alphaFadePerFrame: .002,
+        radiusGrowthPerFrame: 0.05,
+        speedMultiplier: 1,
+        frequencyResponsiveness: 1
+    
+    } 
+
+    constructor(x, y, angle, frequencyBin, speed = 2.5, radius = 5) {
+        this.x = x;             // x-coordinate                 
+        this.y = y;            // y-coordinate              
+        this.radius = radius;   // radius
+        this.speed = speed;         // speed
+        this.color = `hsl(${angle / Math.PI * 180}, 100%, 50%`; // color
+        this.angle = angle;     // angle            
+        this.frequencyBin = frequencyBin;       // frequencyBin 0-255
+        this.angularVelocity = Particle.particleControls.angularVelocity;              // angular velocity
+        this.friction = Particle.particleControls.friction;                  // friction
+        this.alphaFadePerFrame = Particle.particleControls.alphaFadePerFrame;        // alpha fade per frame   
+        this.radiusGrowthPerFrame = Particle.particleControls.radiusGrowthPerFrame;       // radius growth per frame
+        this.runaway = false;                // runaway     (scatter effect)
+        this.ran = false;                   // ran
+        this.vx = Math.cos(angle) * speed;      // velocity x
+        this.vy = Math.sin(angle) * speed;          // velocity y
 
         this.alpha = 1.0; // full opacity
     }
-    swapAngularVelocity = () => {
-        this.angularVelocity *= -1;
+    // Update the particle
+    update = (waveformValue) => {
+        //called when turning off the song to scatter particles
+        if (this.runaway) {
+            this.handleRunaway();
+        }
+        else {
+            //no divinding by 0
+            if (Particle.particleControls.frequencyResponsiveness === 0) {
+                console.error("frequencyResponsiveness is 0");
+                return;
+            }
+            // Calculate deviation from center (128) of waveformValue
+            let deviation = (waveformValue - 128) / (32 * Particle.particleControls.frequencyResponsiveness);
+
+
+            this.move(deviation);
+            this.adjustAlpha(deviation);
+            this.adjustRadius(deviation);
+
+
+        }
     }
+    //handle moving the particle
+    move = (deviation) => {
+        // Use waveform deviation to alter the particle's speed and direction
+        this.x += this.vx * (1 + deviation); 
+        this.y += this.vy * (1 + deviation);
 
-    move = () => {
-        this.x += this.vx;
-        this.y += this.vy;
-
-        // Update the angle for the next move
-        this.angle += this.angularVelocity;
-
-        // Recalculate velocity based on the new angle
-        this.vx = Math.cos(this.angle) * this.speed;
-        this.vy = Math.sin(this.angle) * this.speed;
+        this.angle += this.angularVelocity * (1 + Math.abs(deviation));
+        this.vx = Math.cos(this.angle) * this.speed * Particle.particleControls.speedMultiplier;
+        this.vy = Math.sin(this.angle) * this.speed * Particle.particleControls.speedMultiplier;
 
         // Apply friction
-        this.vx *= 0.993;
-        this.vy *= 0.993;
-
-        // Fade out and grow
-        this.alpha -= 0.006;
-        this.radius += 0.05;
+        this.vx *= this.friction;
+        this.vy *= this.friction;
     }
-
+    //called when the user changes the particle controls
+    updateControls = () => {
+        this.angularVelocity = Particle.particleControls.angularVelocity;              // angular velocity
+        this.friction = Particle.particleControls.friction;                  // friction
+        this.alphaFadePerFrame = Particle.particleControls.alphaFadePerFrame;        // alpha fade per frame   
+        this.radiusGrowthPerFrame = Particle.particleControls.radiusGrowthPerFrame;       // radius growth per frame
+    }
+    // Grow faster with louder sound
+    adjustRadius = (deviation) => {
+        this.radius += this.radiusGrowthPerFrame * (1 + Math.abs(deviation));
+    }
+    // Fade faster with louder sound
+    adjustAlpha = (deviation) => {
+        this.alpha -= this.alphaFadePerFrame * (1 + Math.abs(deviation));
+        if (this.alpha < 0) this.alpha = 0; // Ensure alpha doesn't go negative
+    }
+    //scatter effect
+    handleRunaway = () => {
+        if (!this.ran) {
+            this.vx = Math.random() * 20 - 10;
+            this.vy = Math.random() * 20 - 10;
+            this.ran = true;
+        }
+        this.x += this.vx;
+        this.y += this.vy;
+        this.alpha -= this.alphaFadePerFrame * 2;
+        if (this.alpha < 0) this.alpha = 0;
+    }
+    // Draw the particle
     draw = (ctx) => {
         ctx.save();
         ctx.globalAlpha = this.alpha;
-
-        if (!this.changeBeat) {
-            this.changeBeat = true;
-        }
-        else {
-           // this.color = this.incrementHue(this.color, 10);
-            this.changeBeat = false;
-        }
-
-
         ctx.fillStyle = this.color;
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
         ctx.fill();
         ctx.restore();
-    }
-    incrementHue(incrementPercentage) {
-        // Extract the hue value from the string
-        const hueStart = this.color.indexOf('(') + 1;
-        const hueEnd = this.color.indexOf(',', hueStart);
-        let hueValue = parseFloat(this.color.substring(hueStart, hueEnd));
-    
-        // Calculate the new hue value, increment by 10% of 360 (36 degrees)
-        hueValue += 360 * (incrementPercentage / 100);
-        
-        // Ensure the hue value wraps around if it exceeds 360
-        hueValue = hueValue % 360;
-
-        this.color = `hsl(${hueValue}, 100%, 50%)`;;
     }
 
 }
