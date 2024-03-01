@@ -13,9 +13,9 @@ let particleBeatTracking = {
     beatDecayRate: 0.9,
     beatMin: .15,
     audibleThreshold: 120,
-    bassEndBin: 5,              //256 samples 172hz/bin = 344hz
+    bassEndBin: 4,              //256 samples 172hz/bin = 344hz
     veryLoudBeat: 251,
-    letTheBassDrop: 253,
+    letTheBassDrop: 254.9,
     bassEndVolume: 195,
     beatTrackBinEnd: 16,
     bassDropped: false
@@ -23,6 +23,11 @@ let particleBeatTracking = {
 
 const frequencyScaleFactor = .2; //percent
 const trebleBoost = 1.5; //scalar
+
+let bassBPM, bassBeatCounter = 0;
+let frameCount = 0, beatFrames = 60;
+let beatsPerMinuteSmoothed = [];
+let beatSmoothFrames = 3;
 
 const dropTheBass = () => {
     console.log("bassDropped!");
@@ -41,18 +46,42 @@ const endBassDrop = () => {
     particleBeatTracking.bassDropped = false;
     canvas.changeStarsBackToWhite();
 };
+const updateBPM = (bassAverage, veryLoudBeatThreshold) => {
+      
+    if (bassAverage > veryLoudBeatThreshold) {
+        
+        bassBeatCounter++;
+        console.log(frameCount); 
+        if (frameCount >= beatFrames) {
+            bassBPM = (bassBeatCounter / frameCount) * 60;
+            beatsPerMinuteSmoothed.push(bassBPM);
+            if (beatsPerMinuteSmoothed.length > beatSmoothFrames)
+                beatsPerMinuteSmoothed = beatsPerMinuteSmoothed.slice(1);
+            let sum = 0;
+            for (let i = 0; i < beatsPerMinuteSmoothed.length; i++) {
+                sum += beatsPerMinuteSmoothed[i];
+            }
+            bassBPM = sum / beatsPerMinuteSmoothed.length; //average the last 3 bpm
+            console.log(bassBPM);
+            frameCount = 0;
+            bassBeatCounter = 0;
+        }
+    }
+}
 
 // Update the particles based on the audio data
 const updateParticles = (audioData, audioDataWaveform, analyserNode, canvasWidth, canvasHeight, ctx) => {
+    frameCount++;
     //compute low frequency average
     let sum = 0;
-   let bassData = applySmoothing(audioData.slice(0, particleBeatTracking.bassEndBin), 5);
+    let bassData = applySmoothing(audioData.slice(0, particleBeatTracking.bassEndBin), 5);
     for (let i = 0; i < particleBeatTracking.bassEndBin; i++) {
         sum += bassData[i];
     }
-   let bassAverage = sum / particleBeatTracking.bassEndBin;    //used to detect a change in bass pattern
-   console.log(bassAverage);
-   sum = 0;
+    let bassAverage = sum / particleBeatTracking.bassEndBin;    //used to detect a change in bass pattern
+
+    //console.log(bassAverage);
+    sum = 0;
     for (let i = 0; i < particleBeatTracking.beatTrackBinEnd; i++) {
         sum += audioData[i];
     }
@@ -76,9 +105,18 @@ const updateParticles = (audioData, audioDataWaveform, analyserNode, canvasWidth
     if (average > particleBeatTracking.beatCutOff && average > particleBeatTracking.beatMin) {
         Particle.frequencyResponsivenessAdjusted = Particle.particleControls.frequencyResponsiveness + ((average - 230) / 100);
         // console.log(Particle.frequencyResponsivenessAdjusted);
+        //increment beat counter if a loud bass beat is detected
+        //for tracking bass bpm
+
+
+        updateBPM(bassAverage, particleBeatTracking.veryLoudBeat);
+
+
+
         // Iterate through all the bins of the frequency data
         for (let i = 0; i < audioData.length; i++) {
             //console.log(`${i} - ${audioData[i]}`);    
+
 
 
             // Scale the index to a value between 0 and 1
