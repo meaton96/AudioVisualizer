@@ -33,6 +33,25 @@ const goFullscreen = (element) => {
   }
   // .. and do nothing if the method is not supported
 };
+const applySmoothing = (values, windowSize) => {
+  const smoothedValues = [];
+  for (let i = 0; i < values.length; i++) {
+    let sum = values[i];
+    let count = 1;
+    for (let j = 1; j <= windowSize; j++) {
+      if (i - j >= 0) {
+        sum += values[i - j];
+        count++;
+      }
+      if (i + j < values.length) {
+        sum += values[i + j];
+        count++;
+      }
+    }
+    smoothedValues.push(sum / count);
+  }
+  return smoothedValues;
+};
 
 
-export { makeColor, getRandomColor, getLinearGradient, goFullscreen };
+export { makeColor, getRandomColor, getLinearGradient, goFullscreen, applySmoothing };

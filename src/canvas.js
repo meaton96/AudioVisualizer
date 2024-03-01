@@ -174,6 +174,12 @@ const detectBeat = (val = 1) => {
     beatIntensity = val;
     star.changeStarsDirection();
 
+}   
+const changeStarsOnBassDrop = () => {
+    star.rainbowifyStars();
+}
+const changeStarsBackToWhite =() => {
+    star.changeStarsColor('#FFF');
 }
 const alterImage = (params = {}) => {
     // 6 - bitmap manipulation
@@ -331,4 +337,4 @@ const setWaveFormDeviation = (deviation) => {
     frameWaveformDeviation = deviation;
 }
 
-export { setupCanvas, draw, detectBeat, getBeatDetected, setWaveFormDeviation, detectVeryLoudBeat };
+export { setupCanvas, draw, detectBeat, getBeatDetected, setWaveFormDeviation, detectVeryLoudBeat,changeStarsOnBassDrop, changeStarsBackToWhite };

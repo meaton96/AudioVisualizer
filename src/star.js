@@ -25,6 +25,11 @@ const changeStarsDirection = () => {
     });
 
 }
+const rainbowifyStars = () => {
+    stars.forEach(star => {
+        star.color = `hsl(${Math.random() * 360}, 100%, 50%)`;
+    });
+}
 const changeStarsColor = (color) => {
     stars.forEach(star => {
         if (color)
@@ -104,4 +109,4 @@ class Star {
         this.ctx.restore();
     }
 }
-export { createStars, drawStars, updateStars, changeStarsDirection, stopStars, changeStarsColor };
+export { createStars, drawStars, updateStars, changeStarsDirection, stopStars, changeStarsColor, rainbowifyStars };

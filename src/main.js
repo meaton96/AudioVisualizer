@@ -23,7 +23,7 @@ const drawParams = {
   showEmboss: false,
   showWaveform: false,
   showParticles: true,
-  showLine: true,
+  showLine: false,
   showVignette: true,
   showStars: true,
   showTunnel: true
@@ -33,7 +33,7 @@ const particleControls = Particle.particleControls;
 
 // 1 - here we are faking an enumeration
 const DEFAULTS = Object.freeze({
-  sound1: "media/New Adventure Theme.mp3"
+  sound1: "media/ftw.mp3"
 });
 
 const init = () => {
@@ -193,23 +193,25 @@ const setupButtons = (canvasElement) => {
   };
   const playButton = document.querySelector("#btn-play");
   playButton.onclick = e => {
-    console.log(`audioCtx.state before = ${audio.audioCtx.state}`);
+   // console.log(`audioCtx.state before = ${audio.audioCtx.state}`);
     // check if context is in suspended state (autoplay policy)
     if (audio.audioCtx.state == "suspended") {
       audio.audioCtx.resume();
     }
-    console.log(`audioCtx.state after = ${audio.audioCtx.state}`);
+   // console.log(`audioCtx.state after = ${audio.audioCtx.state}`);
     if (e.target.dataset.playing == "no") {
       // if track is currently paused, play it
       particleController.clearParticles();
       star.stopStars();
       audio.playCurrentSound();
+      
       e.target.dataset.playing = "yes";
     } else {
       // if track is currently playing, pause it
       particleController.clearParticles();
       star.stopStars();
       audio.pauseCurrentSound();
+      particleController.endBassDrop();
       e.target.dataset.playing = "no";
     }
   };

@@ -1,6 +1,7 @@
 import { Particle } from './particle.js';
-import { detectBeat, getBeatDetected, detectVeryLoudBeat } from './canvas.js';
+import * as canvas from './canvas.js';
 import { DEFAULTS } from './audio.js';
+import { applySmoothing } from './utils.js';
 
 let particles = [];
 // Beat tracking parameters
@@ -12,17 +13,63 @@ let particleBeatTracking = {
     beatDecayRate: 0.9,
     beatMin: .15,
     audibleThreshold: 120,
-    bassEndBin: 5,
-    veryLoudBeat: 251
+    bassEndBin: 5,              //256 samples 172hz/bin = 344hz
+    veryLoudBeat: 251,
+    letTheBassDrop: 253,
+    bassEndVolume: 195,
+    beatTrackBinEnd: 16,
+    bassDropped: false
 };
+
+const frequencyScaleFactor = .2; //percent
+const trebleBoost = 1.5; //scalar
+
+const dropTheBass = () => {
+    console.log("bassDropped!");
+    Particle.particleControls.baseSpeed = 5;
+    Particle.particleControls.baseRadius = 15;
+    Particle.particleControls.frequencyResponsiveness *= 2;
+    particleBeatTracking.bassDropped = true;
+    canvas.changeStarsOnBassDrop();
+}
+const endBassDrop = () => {
+    if (!particleBeatTracking.bassDropped) return;
+    console.log("bassEnded!");
+    Particle.particleControls.baseSpeed = Particle.defaultParticleControls.baseSpeed;
+    Particle.particleControls.baseRadius = Particle.defaultParticleControls.baseRadius;
+    Particle.particleControls.frequencyResponsiveness /= 2;
+    particleBeatTracking.bassDropped = false;
+    canvas.changeStarsBackToWhite();
+};
+
 // Update the particles based on the audio data
 const updateParticles = (audioData, audioDataWaveform, analyserNode, canvasWidth, canvasHeight, ctx) => {
     //compute low frequency average
     let sum = 0;
+   let bassData = applySmoothing(audioData.slice(0, particleBeatTracking.bassEndBin), 5);
     for (let i = 0; i < particleBeatTracking.bassEndBin; i++) {
+        sum += bassData[i];
+    }
+   let bassAverage = sum / particleBeatTracking.bassEndBin;    //used to detect a change in bass pattern
+   console.log(bassAverage);
+   sum = 0;
+    for (let i = 0; i < particleBeatTracking.beatTrackBinEnd; i++) {
         sum += audioData[i];
     }
-    let average = sum / particleBeatTracking.bassEndBin;
+    let average = sum / particleBeatTracking.beatTrackBinEnd;
+    // if (particleBeatTracking.bassDropped)
+    //     //console.log(average);
+    if (!particleBeatTracking.bassDropped && bassAverage > particleBeatTracking.letTheBassDrop) {
+        dropTheBass();
+    }
+    else if (particleBeatTracking.bassDropped) {
+        if (bassAverage > particleBeatTracking.letTheBassDrop) {
+            canvas.changeStarsOnBassDrop();
+        }
+        else if (bassAverage < particleBeatTracking.bassEndVolume)
+            endBassDrop();
+
+    }
     let angleIncrement = (Math.PI * 2) / (analyserNode.fftSize / 2.35);
     //console.log(average);
     //use average to spawn particles
@@ -31,19 +78,34 @@ const updateParticles = (audioData, audioDataWaveform, analyserNode, canvasWidth
         // console.log(Particle.frequencyResponsivenessAdjusted);
         // Iterate through all the bins of the frequency data
         for (let i = 0; i < audioData.length; i++) {
+            //console.log(`${i} - ${audioData[i]}`);    
+
+
+            // Scale the index to a value between 0 and 1
+            const scaledIndex = i / (audioData.length - 1);
+            // Convert the scaled index to a value between -1 and 1
+            const percent = scaledIndex * 2 - 1;
+            // Apply the scale factor
+            const scaleAmount = 1 + frequencyScaleFactor * percent;
+
+
+            //  console.log(i + " - " + audioData[i] * scaleAmount);
+
+            const scaledAudioData = audioData[i] * scaleAmount * (i > audioData.length / 2 ? trebleBoost : 1);
 
             // Check if the frequency value exceeds the audible threshold
-            if (audioData[i] > particleBeatTracking.audibleThreshold) {
+            if (scaledAudioData > particleBeatTracking.audibleThreshold) {
 
 
-                if (!getBeatDetected() && audioData[i] > Particle.particleControls.veryLoudBeat) {
-                    detectVeryLoudBeat();
+
+                if (!canvas.getBeatDetected() && audioData[i] > Particle.particleControls.veryLoudBeat) {
+                    canvas.detectVeryLoudBeat();
 
                 }
                 else if (average > particleBeatTracking.audibleThreshold * 2) {
                     //twice as loud as the threshold
                     //used for modifying the vignette
-                    detectBeat();
+                    canvas.detectBeat();
 
                 }
 
@@ -90,6 +152,7 @@ const updateParticles = (audioData, audioDataWaveform, analyserNode, canvasWidth
         }
     });
 };
+
 //clear the projectiles by initiating scatter protocol 
 const clearParticles = () => {
     particles.forEach((p) => {
@@ -99,4 +162,6 @@ const clearParticles = () => {
 
 
 
-export { updateParticles, clearParticles };
+
+
+export { updateParticles, clearParticles, endBassDrop };

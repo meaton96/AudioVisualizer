@@ -9,7 +9,7 @@ let element, sourceNode, analyserNode, gainNode, bassNode, trebleNode;
 // 3 - here we are faking an enumeration
 export const DEFAULTS = Object.freeze({
     gain: 0.5,
-    numSamples: 256
+    numSamples: 512
 });
 
 
