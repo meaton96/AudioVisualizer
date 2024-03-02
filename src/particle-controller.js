@@ -32,6 +32,7 @@ let beatSmoothFrames = 3;
 let previousLoudestFrequencyBin = 0;
 let loudestFrequencyBin = 0;
 
+//toggle on the bass drop effect by increases base radius, speed, and frequency responsiveness
 const dropTheBass = () => {
     if (bassBPM < 2) return;
     console.log("bassDropped!");
@@ -39,8 +40,9 @@ const dropTheBass = () => {
     Particle.particleControls.baseRadius = 15;
     Particle.particleControls.frequencyResponsiveness *= 2;
     particleBeatTracking.bassDropped = true;
-    canvas.changeStarsOnBassDrop();
+    canvas.changeStarsOnBassDrop(); //also change the stars
 }
+//toggle off the bass drop effect by decreasing base radius, speed, and frequency responsiveness
 const endBassDrop = () => {
     if (!particleBeatTracking.bassDropped) return;
     console.log("bassEnded!");
@@ -48,13 +50,17 @@ const endBassDrop = () => {
     Particle.particleControls.baseRadius = Particle.defaultParticleControls.baseRadius;
     Particle.particleControls.frequencyResponsiveness /= 2;
     particleBeatTracking.bassDropped = false;
-    canvas.changeStarsBackToWhite();
+    canvas.changeStarsBackToWhite();//also change the stars
 };
+//update the bass beats per minute
 const updateBPM = (bassAverage, veryLoudBeatThreshold) => {
 
+    //detect very loud bass beat only
     if (bassAverage > veryLoudBeatThreshold) {
 
         bassBeatCounter++;
+
+        //calculate bpm every 60 frames
         if (frameCount >= beatFrames) {
             bassBPM = (bassBeatCounter / frameCount) * 60;
             beatsPerMinuteSmoothed.push(bassBPM);
@@ -64,17 +70,16 @@ const updateBPM = (bassAverage, veryLoudBeatThreshold) => {
             for (let i = 0; i < beatsPerMinuteSmoothed.length; i++) {
                 sum += beatsPerMinuteSmoothed[i];
             }
-            bassBPM = sum / beatsPerMinuteSmoothed.length; 
+            //reset counters, bpm is over 60 frames/1 second smoothed over 3 seconds
+            bassBPM = sum / beatsPerMinuteSmoothed.length;
             frameCount = 0;
             bassBeatCounter = 0;
         }
     }
 }
 
-// Update the particles based on the audio data
-const updateParticles = (audioData, audioDataWaveform, analyserNode, canvasWidth, canvasHeight, ctx) => {
-    frameCount++;
-    //compute low frequency average
+//calculate the average of the audio data
+const calculateAverages = (audioData) => {
     let sum = 0;
     let bassData = applySmoothing(audioData.slice(0, particleBeatTracking.bassEndBin), 5);
     for (let i = 0; i < particleBeatTracking.bassEndBin; i++) {
@@ -82,14 +87,21 @@ const updateParticles = (audioData, audioDataWaveform, analyserNode, canvasWidth
     }
     let bassAverage = sum / particleBeatTracking.bassEndBin;    //used to detect a change in bass pattern
 
-    //console.log(bassAverage);
     sum = 0;
     for (let i = 0; i < particleBeatTracking.beatTrackBinEnd; i++) {
         sum += audioData[i];
     }
-    let average = sum / particleBeatTracking.beatTrackBinEnd;
-    // if (particleBeatTracking.bassDropped)
-    //     //console.log(average);
+    let average = sum / particleBeatTracking.beatTrackBinEnd;   //used to detect a beat
+
+    return { average, bassAverage };
+}
+//used by the ui button to disable the ongoing bass effect if its on when the toggle is pressed
+const toggleBassDropEnd = () => {
+    if (particleBeatTracking.bassDropped) {
+        endBassDrop();
+    }
+}
+const checkForBassDrop = (bassAverage) => {
     if (Particle.particleControls.bassDropEffect &&
         !particleBeatTracking.bassDropped &&
         bassAverage > particleBeatTracking.letTheBassDrop) {
@@ -100,9 +112,18 @@ const updateParticles = (audioData, audioDataWaveform, analyserNode, canvasWidth
             canvas.changeStarsOnBassDrop();
         }
         else if (bassAverage < particleBeatTracking.bassEndVolume)
-            endBassDrop();
+            toggleBassDropEnd();
 
     }
+}
+
+
+// Update the particles based on the audio data
+const updateParticles = (audioData, audioDataWaveform, analyserNode, canvasWidth, canvasHeight, ctx) => {
+    frameCount++;
+    let { average, bassAverage } = calculateAverages(audioData);
+    checkForBassDrop(bassAverage);
+
     let angleIncrement = (Math.PI * 2) / (analyserNode.fftSize / Particle.particleControls.circularizationFactor);
     //console.log(average);
     //use average to spawn particles
@@ -161,7 +182,7 @@ const updateParticles = (audioData, audioDataWaveform, analyserNode, canvasWidth
                 let pos = { x: canvasWidth / 2, y: canvasHeight / 2 };
                 pos.x += Math.cos(angle) * particleBeatTracking.spawnRadius; //radius of spawn from center
                 pos.y += Math.sin(angle) * particleBeatTracking.spawnRadius;
-               // console.log(previousLoudestFrequencyBin);
+                // console.log(previousLoudestFrequencyBin);
                 // Create and add a new particle 
                 let p = new Particle(pos.x,
                     pos.y,
@@ -217,4 +238,4 @@ const clearParticles = () => {
 
 
 
-export { updateParticles, clearParticles, endBassDrop };
+export { updateParticles, clearParticles, endBassDrop, toggleBassDropEnd };

@@ -25,7 +25,7 @@ let tunnelCenterX;
 let tunnelCenterY;
 let tunnelRadius;
 let tunnelRadiusScalar = 1.5;
-let tunnelSpeed = 4; // Speed of the tunnel movement
+let tunnelSpeed = 4;
 let colorStops = [
     { percent: 0, color: "#87CEFA" },
     { percent: 0.2, color: "#E6E6FA" },
@@ -33,8 +33,7 @@ let colorStops = [
     { percent: 0.6, color: "#FFDDF4" },
     { percent: 0.8, color: "#FFE4E1" },
     { percent: 1, color: "#87CEFA" }
-]; // Array of color stops for the gradient
-
+];
 
 const setupCanvas = (canvasElement, analyserNodeRef) => {
     // create drawing context
@@ -47,7 +46,7 @@ const setupCanvas = (canvasElement, analyserNodeRef) => {
     tunnelRadius = Math.min(canvasWidth, canvasHeight) * tunnelRadiusScalar; // Initial tunnel radius
     // create a gradient that runs top to bottom
     gradient = utils.getLinearGradient(ctx, 0, 0, 0, canvasHeight, [{ percent: 0, color: "#87CEFA" }, { percent: .25, color: "#E6E6FA" }, { percent: .5, color: "#D8BFD8" }, { percent: .75, color: "#FFDDF4" }, { percent: 1, color: "#FFE4E1" }]);
-    
+
     // keep a reference to the analyser node
     analyserNode = analyserNodeRef;
     // this is the array where the analyser data will be stored
@@ -97,7 +96,7 @@ const draw = (params = {}) => {
     }
     if (params.tunnel && audioData && audioData[0] != 0)
         updateTunnelGradient(audioData);
-    
+
 
 
     if (params.gradient) {
@@ -130,9 +129,6 @@ const draw = (params = {}) => {
 
 }
 const updateTunnelGradient = (audioData) => {
-    // Move the tunnel center
-    // tunnelCenterX += tunnelSpeed;
-    //  tunnelCenterY += tunnelSpeed;
     const getAverageValues = (audioData) => {
         const sum = audioData.reduce((acc, val) => acc + val, 0);
         const average = sum / audioData.length;
@@ -142,13 +138,10 @@ const updateTunnelGradient = (audioData) => {
     const averageValues = getAverageValues(audioData);
     const percentSpeed = tunnelSpeed * (averageValues / DEFAULTS.numSamples);
 
-    
-
-
     // Update the color stops to create a dynamic gradient
-    
+
     colorStops.forEach(stop => {
-        stop.percent += 0.01  * percentSpeed; // Increase the stop position
+        stop.percent += 0.01 * percentSpeed; // Increase the stop position
         if (stop.percent > 1) {
             stop.percent -= 1; // Loop back to the beginning if the stop exceeds 1
         }
@@ -169,18 +162,22 @@ const updateTunnelGradient = (audioData) => {
 const fadeVignette = (vignetteFadeSpeed) => {
     beatIntensity = Math.max(0, beatIntensity - vignetteFadeSpeed); // Gradually decrease
 }
+//called by particle controller when a loud beat is detected (2x the audible threshold)
 const detectBeat = (val = 1) => {
     beatDetected = true
     beatIntensity = val;
     star.changeStarsDirection();
 
-}   
+}
+//called by particle controller when a very loud beat is detected and there is a lot of bass
 const changeStarsOnBassDrop = () => {
     star.rainbowifyStars();
 }
-const changeStarsBackToWhite =() => {
+//reset star color to white
+const changeStarsBackToWhite = () => {
     star.changeStarsColor('#FFF');
 }
+//draw functions for the image manipulation
 const alterImage = (params = {}) => {
     // 6 - bitmap manipulation
     // TODO: right now. we are looping though every pixel of the canvas (320,000 of them!), 
@@ -233,6 +230,75 @@ const alterImage = (params = {}) => {
     ctx.putImageData(imageData, 0, 0);
 
 }
+const drawBars = () => {
+    let barSpacing = 4;
+    let margin = 5;
+    let screenWidthForBars = canvasWidth - (audioData.length * barSpacing) - margin * 2;
+    let barWidth = screenWidthForBars / audioData.length;
+    let barHeight = 200;
+    let topSpacing = params.waveform ? 0 : 300;
+
+    ctx.save();
+    ctx.fillStyle = 'rgba(0,255,0,0.50)';
+    ctx.strokeStyle = 'rgba(0,255,0,0.75)';
+    for (let i = 0; i < audioData.length; i++) {
+        ctx.fillRect(margin + i * (barWidth + barSpacing), topSpacing + DEFAULTS.numSamples - audioData[i], barWidth, barHeight);
+        ctx.strokeRect(margin + i * (barWidth + barSpacing), topSpacing + DEFAULTS.numSamples - audioData[i], barWidth, barHeight);
+    }
+    ctx.restore();
+}
+const drawCircles = () => {
+    
+    let maxRadius = canvasHeight / 4;
+    ctx.save();
+    ctx.globalAlpha = 0.5;
+    for (let i = 0; i < audioData.length; i++) {
+        let percent = audioData[i] / (DEFAULTS.numSamples - 1);
+
+        let circleRadius = percent * maxRadius;
+        ctx.beginPath();
+        ctx.fillStyle = utils.makeColor(255, 111, 111, .34 - percent / 3.0);
+        ctx.arc(canvasWidth / 2, canvasHeight / 2, circleRadius, 0, 2 * Math.PI, false);
+        ctx.fill();
+        ctx.closePath();
+
+        ctx.beginPath();
+        ctx.fillStyle = utils.makeColor(0, 0, 255, .10 - percent / 10.0);
+        ctx.arc(canvasWidth / 2, canvasHeight / 2, circleRadius * 1.5, 0, 2 * Math.PI, false);
+        ctx.fill();
+        ctx.closePath();
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.fillStyle = utils.makeColor(200, 200, 0, .5 - percent / 5.0);
+        ctx.arc(canvasWidth / 2, canvasHeight / 2, circleRadius * 0.5, 0, 2 * Math.PI, false);
+        ctx.fill();
+        ctx.closePath();
+        ctx.restore();
+    }
+    ctx.restore();
+}
+const drawLine = () => {
+    let margin = 4; // Margin from the bottom of the canvas
+    let height = canvasHeight - margin; // Y position for the line (near the bottom)
+    let width = canvasWidth / audioData.length; // Width of each segment of the line
+
+    ctx.save();
+    ctx.beginPath();
+    // Start from the bottom left, offset by the first audio data point
+    ctx.moveTo(0, height - audioData[0]); // Adjust Y position based on audio data
+
+    ctx.strokeStyle = utils.makeColor(255, 255, 255, 1);
+    ctx.lineWidth = 3;
+
+    for (let i = 1; i < audioData.length; i++) {
+        // Draw line segments along the bottom of the screen
+        ctx.lineTo(i * width, height - audioData[i]); // Adjust X and Y positions
+    }
+    ctx.stroke(); // Draw the path
+    ctx.restore();
+}
+//main draw function for the audio visualizer
 const drawAudioVisualizer = (params = {}) => {
     // 2 - draw background
     ctx.save();
@@ -243,78 +309,18 @@ const drawAudioVisualizer = (params = {}) => {
 
 
     if (params.bars) {
+        drawBars();
 
-        let barSpacing = 4;
-        let margin = 5;
-        let screenWidthForBars = canvasWidth - (audioData.length * barSpacing) - margin * 2;
-        let barWidth = screenWidthForBars / audioData.length;
-        let barHeight = 200;
-        let topSpacing = params.waveform ? 0 : 300;
-
-        ctx.save();
-        ctx.fillStyle = 'rgba(0,255,0,0.50)';
-        ctx.strokeStyle = 'rgba(0,255,0,0.75)';
-        for (let i = 0; i < audioData.length; i++) {
-            ctx.fillRect(margin + i * (barWidth + barSpacing), topSpacing + DEFAULTS.numSamples - audioData[i], barWidth, barHeight);
-            ctx.strokeRect(margin + i * (barWidth + barSpacing), topSpacing + DEFAULTS.numSamples - audioData[i], barWidth, barHeight);
-        }
-        ctx.restore();
     }
     // 5 - draw circles
     if (params.circles && !params.waveform) {
-
-        let maxRadius = canvasHeight / 4;
-        ctx.save();
-        ctx.globalAlpha = 0.5;
-        for (let i = 0; i < audioData.length; i++) {
-            let percent = audioData[i] / (DEFAULTS.numSamples - 1);
-
-            let circleRadius = percent * maxRadius;
-            ctx.beginPath();
-            ctx.fillStyle = utils.makeColor(255, 111, 111, .34 - percent / 3.0);
-            ctx.arc(canvasWidth / 2, canvasHeight / 2, circleRadius, 0, 2 * Math.PI, false);
-            ctx.fill();
-            ctx.closePath();
-
-            ctx.beginPath();
-            ctx.fillStyle = utils.makeColor(0, 0, 255, .10 - percent / 10.0);
-            ctx.arc(canvasWidth / 2, canvasHeight / 2, circleRadius * 1.5, 0, 2 * Math.PI, false);
-            ctx.fill();
-            ctx.closePath();
-
-            ctx.save();
-            ctx.beginPath();
-            ctx.fillStyle = utils.makeColor(200, 200, 0, .5 - percent / 5.0);
-            ctx.arc(canvasWidth / 2, canvasHeight / 2, circleRadius * 0.5, 0, 2 * Math.PI, false);
-            ctx.fill();
-            ctx.closePath();
-            ctx.restore();
-        }
-        ctx.restore();
+        drawCircles();
     }
     if (params.particles) {
         particleController.updateParticles(audioData, audioDataWaveform, analyserNode, canvasWidth, canvasHeight, ctx);
     }
     if (params.line) {
-        let margin = 4; // Margin from the bottom of the canvas
-        let height = canvasHeight - margin; // Y position for the line (near the bottom)
-        let width = canvasWidth / audioData.length; // Width of each segment of the line
-
-        ctx.save();
-        ctx.beginPath();
-        // Start from the bottom left, offset by the first audio data point
-        ctx.moveTo(0, height - audioData[0]); // Adjust Y position based on audio data
-
-        ctx.strokeStyle = utils.makeColor(255, 255, 255, 1);
-        ctx.lineWidth = 3;
-
-        for (let i = 1; i < audioData.length; i++) {
-            // Draw line segments along the bottom of the screen
-            ctx.lineTo(i * width, height - audioData[i]); // Adjust X and Y positions
-        }
-        // Do not close the path to avoid drawing a line back to the start point
-        ctx.stroke(); // Apply the stroke to the path
-        ctx.restore();
+        drawLine();
     }
 
 
@@ -328,4 +334,4 @@ const setWaveFormDeviation = (deviation) => {
     frameWaveformDeviation = deviation;
 }
 
-export { setupCanvas, draw, detectBeat, getBeatDetected, setWaveFormDeviation, detectVeryLoudBeat,changeStarsOnBassDrop, changeStarsBackToWhite };
+export { setupCanvas, draw, detectBeat, getBeatDetected, setWaveFormDeviation, detectVeryLoudBeat, changeStarsOnBassDrop, changeStarsBackToWhite };

@@ -21,10 +21,7 @@ const drawParams = {
   colorLoudest: false,
   bassDropEffect: true
 };
-//const particleControls = Particle.particleControls;
 
-
-// 1 - here we are faking an enumeration
 const DEFAULTS = Object.freeze({
   sound1: "media/ftw.mp3"
 });
@@ -35,23 +32,21 @@ const init = (json) => {
   const seekBar = document.getElementById('seek-bar');
   const timeElement = document.getElementById('time');
   document.title = json.appTitle;
-  //Particle.setDefaultParticleControls(json.defaultParticleControls);
 
 
   audio.setupWebAudio(DEFAULTS.sound1, seekBar, timeElement);
 
 
-  //console.log(`Testing utils.getRandomColor() import: ${utils.getRandomColor()}`);
   let canvasElement = document.querySelector("canvas"); // hookup <canvas> element
   setupUI(canvasElement, json);
   canvas.setupCanvas(canvasElement, audio.analyserNode);
   loop();
 
 }
+//updates the particle hue control
 const updateParticleHueControl = (type, value) => {
   let varType = type === 'min' ? 'minHue' : 'maxHue';
   Particle.particleControls[varType] = parseInt(value); // Update the hue value in particle controls
-  //console.log(`#${type}-number`);
   document.querySelector(`#${type}-hue-number`).value = value; // Synchronize number input
   document.querySelector(`#${type}-hue`).value = value; // Synchronize range slider
 }
@@ -62,28 +57,23 @@ const setupUI = (canvasElement, json) => {
   setupButtons(canvasElement, json);
 
   setupVolumeSilder();
-
-
-  //setupCheckboxes();
-
   createParticleControls(json);
-
-
-  //add .onclick event to button
-
 
 } // end setupUI
 
-
+//takes the value from the slider and updates the particle control
 const updateParticleControl = (key, value) => {
 
   if (key === 'bassDropEffect' || key === 'colorLoudest') {
-    Particle.particleControls[key] = value; // Update the static property
-    //console.log(`${key}: ${Particle.particleControls[key]}`); // Log the value
+    Particle.particleControls[key] = value; 
+    if (key === 'bassDropEffect') {
+      particleController.toggleBassDropEnd();
+    }
+
     return;
   }
 
-  Particle.particleControls[key] = parseFloat(value); // Update the static property
+  Particle.particleControls[key] = parseFloat(value); 
 
 
 }
