@@ -25,10 +25,12 @@ main {
 #split {
     margin: 1rem;
     display: flex;
+    
 }
 
 #split > * {
     flex-basis: 50%;
+    margin: 1rem;
 }
 
 

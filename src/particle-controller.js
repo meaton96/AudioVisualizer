@@ -13,7 +13,7 @@ let particleBeatTracking = {
     beatDecayRate: 0.9,
     beatMin: .15,
     audibleThreshold: 110,
-    bassEndBin: 4,              
+    bassEndBin: 4,
     veryLoudBeat: 220,
     letTheBassDrop: 254.9,
     bassEndVolume: 195,
@@ -29,6 +29,8 @@ let bassBPM, bassBeatCounter = 0;
 let frameCount = 0, beatFrames = 60;
 let beatsPerMinuteSmoothed = [];
 let beatSmoothFrames = 3;
+let previousLoudestFrequencyBin = 0;
+let loudestFrequencyBin = 0;
 
 const dropTheBass = () => {
     if (bassBPM < 2) return;
@@ -49,11 +51,11 @@ const endBassDrop = () => {
     canvas.changeStarsBackToWhite();
 };
 const updateBPM = (bassAverage, veryLoudBeatThreshold) => {
-      
+
     if (bassAverage > veryLoudBeatThreshold) {
-        
+
         bassBeatCounter++;
-        console.log(frameCount); 
+        //console.log(frameCount);
         if (frameCount >= beatFrames) {
             bassBPM = (bassBeatCounter / frameCount) * 60;
             beatsPerMinuteSmoothed.push(bassBPM);
@@ -64,7 +66,7 @@ const updateBPM = (bassAverage, veryLoudBeatThreshold) => {
                 sum += beatsPerMinuteSmoothed[i];
             }
             bassBPM = sum / beatsPerMinuteSmoothed.length; //average the last 3 bpm
-            console.log(bassBPM);
+            //console.log(bassBPM);
             frameCount = 0;
             bassBeatCounter = 0;
         }
@@ -90,7 +92,9 @@ const updateParticles = (audioData, audioDataWaveform, analyserNode, canvasWidth
     let average = sum / particleBeatTracking.beatTrackBinEnd;
     // if (particleBeatTracking.bassDropped)
     //     //console.log(average);
-    if (!particleBeatTracking.bassDropped && bassAverage > particleBeatTracking.letTheBassDrop) {
+    if (Particle.particleControls.bassDropEffect &&
+        !particleBeatTracking.bassDropped &&
+        bassAverage > particleBeatTracking.letTheBassDrop) {
         dropTheBass();
     }
     else if (particleBeatTracking.bassDropped) {
@@ -136,9 +140,14 @@ const updateParticles = (audioData, audioDataWaveform, analyserNode, canvasWidth
             // Check if the frequency value exceeds the audible threshold
             if (scaledAudioData > particleBeatTracking.audibleThreshold) {
 
+                if (audioData[i] > loudestFrequencyBin) {
+                    loudestFrequencyBin = i;
+                }
 
 
-                if (!canvas.getBeatDetected() && audioData[i] > Particle.particleControls.veryLoudBeat) {
+                if (Particle.particleControls.bassDropEffect &&
+                    !canvas.getBeatDetected() &&
+                    audioData[i] > Particle.particleControls.veryLoudBeat) {
                     canvas.detectVeryLoudBeat();
 
                 }
@@ -150,19 +159,25 @@ const updateParticles = (audioData, audioDataWaveform, analyserNode, canvasWidth
                 }
 
 
-                // Calculate the angle for this particle
-                let angle = i * angleIncrement;
+                let angle = angleIncrement * i;
                 let pos = { x: canvasWidth / 2, y: canvasHeight / 2 };
                 pos.x += Math.cos(angle) * particleBeatTracking.spawnRadius; //radius of spawn from center
                 pos.y += Math.sin(angle) * particleBeatTracking.spawnRadius;
-
+                console.log(previousLoudestFrequencyBin);
                 // Create and add a new particle 
-                let p = new Particle(pos.x, pos.y, angle, i, Particle.particleControls.baseSpeed, audioData[i] / (DEFAULTS.numSamples - 1) * Particle.particleControls.baseRadius);
+                let p = new Particle(pos.x,
+                    pos.y,
+                    angle,
+                    i,
+                    Particle.particleControls.baseSpeed,
+                    audioData[i] / (DEFAULTS.numSamples - 1) * Particle.particleControls.baseRadius,
+                    previousLoudestFrequencyBin);
 
                 particles.push(p);
 
             }
         }
+        previousLoudestFrequencyBin = loudestFrequencyBin;
         // Reset beat tracking after spawning particles
         particleBeatTracking.beatCutOff = average * 1.5;
         particleBeatTracking.beatTime = 0;

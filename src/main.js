@@ -74,7 +74,14 @@ const setupUI = (canvasElement, json) => {
 
 
 const updateParticleControl = (key, value) => {
+  if (key === 'bassDropEffect' || key === 'colorBasedOnLoudestFrequency') {
+    Particle.particleControls[key] = value; // Update the static property
+   // console.log(`bassDropEffect: ${Particle.particleControls[key]}`); // Log the value
+    return;
+  }
+
   Particle.particleControls[key] = parseFloat(value); // Update the static property
+  
 
 }
 const resetParticleControls = () => {
@@ -95,7 +102,7 @@ const resetParticleControls = () => {
 const createParticleControls = (json) => {
   const container = document.querySelector('#particle-controls');
 
-  
+
   const particleControls = json.defaultParticleControls;
   Object.keys(particleControls).forEach(key => {
     // Create a label for the control
@@ -103,41 +110,58 @@ const createParticleControls = (json) => {
     label.innerHTML = `${key}: `;
     label.for = key;
 
-    // Create a slider for the control
-    const slider = document.createElement('input');
-    slider.type = 'range';
-    slider.id = key;
-    slider.value = particleControls[key];
-    // Define min, max, and step values as needed for each control
-    slider.min = 0;
-    slider.max = key.includes('alpha') || key.includes('velocity') ? 0.1 : 10; // Adjust based on your range needs
-    slider.step = key.includes('alpha') || key.includes('velocity') ? 0.001 : 0.1;
-
-    // Create an input field for the control
-    const input = document.createElement('input');
-    input.type = 'number';
-    input.value = particleControls[key];
-    input.step = slider.step; // Align step values with the slider
-    input.id = `${key}-input`;
-
-    // Update the particle control and the corresponding input field when the slider value changes
-    slider.oninput = (e) => {
-      const value = e.target.value;
-      input.value = value;
-      updateParticleControl(key, value);
-    };
-
-    // Update the particle control and the corresponding slider when the input field value changes
-    input.oninput = (e) => {
-      const value = e.target.value;
-      slider.value = value;
-      updateParticleControl(key, value);
-    };
-
     // Append the controls to the container
     container.appendChild(label);
-    container.appendChild(slider);
-    container.appendChild(input);
+
+
+    if (key !== 'bassDropEffect' && key !== 'colorBasedOnLoudestFrequency') {
+      // Create a slider for the control
+      const slider = document.createElement('input');
+      slider.type = 'range';
+      slider.id = key;
+      slider.value = particleControls[key];
+      // Define min, max, and step values as needed for each control
+      slider.min = 0;
+      slider.max = key.includes('alpha') || key.includes('velocity') ? 0.1 : 10; // Adjust based on your range needs
+      slider.step = key.includes('alpha') || key.includes('velocity') ? 0.001 : 0.1;
+
+      // Create an input field for the control
+      const input = document.createElement('input');
+      input.type = 'number';
+      input.value = particleControls[key];
+      input.step = slider.step; // Align step values with the slider
+      input.id = `${key}-input`;
+
+      // Update the particle control and the corresponding input field when the slider value changes
+      slider.oninput = (e) => {
+        const value = e.target.value;
+        input.value = value;
+        updateParticleControl(key, value);
+
+      };
+
+      // Update the particle control and the corresponding slider when the input field value changes
+      input.oninput = (e) => {
+        const value = e.target.value;
+        slider.value = value;
+        updateParticleControl(key, value);
+      };
+      container.appendChild(slider);
+      container.appendChild(input);
+    } else {
+      // Create a checkbox for the control
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.id = key;
+      checkbox.checked = particleControls[key];
+
+      checkbox.onchange = (e) => {
+        const value = e.target.checked;
+        updateParticleControl(key, value);
+      };
+      container.appendChild(checkbox);
+    }
+
     container.appendChild(document.createElement('br')); // For layout, to put each control on a new line
   });
 

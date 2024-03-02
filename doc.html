@@ -40,7 +40,7 @@
             <p>I have 2 sprites.. I read something about needing 2 right?</p>
             <div id="split">
                 <div>
-                    <span class="class">Particle</span>
+                    <span class="class"><h2>Particle</h2></span>
                     <p>Particles are the main foreground animation They are spawned using beat detection.</p>
 
                     <p>When a beat is detected, all bins in the audio frequency data is tested for an "audible" volume.
@@ -68,18 +68,18 @@
 
                     <h3>Particles are then updated with their corresponding wafeForm data every frame</h4>
 
-                    <code>
+                        <code>
                         <code>
                             <span class="variable">let</span> <span class="variable">waveformIndex</span> = <span class="variable">Math</span>.<span class="function">floor</span>(<span class="variable">index</span> * (<span class="variable">audioDataWaveform</span>.<span class="variable">length</span> / <span class="variable">particles</span>.<span class="variable">length</span>));<br>
                             <span class="variable">let</span> <span class="variable">waveformValue</span> = <span class="variable">audioDataWaveform</span>[<span class="variable">waveformIndex</span>];<br>
                             <span class="variable">p</span>.<span class="function">update</span>(<span class="variable">waveformValue</span>);
                             </code>
-                    </code>
+                        </code>
 
-                    <h3>Particles use this for velocity deviation</h3>
+                        <h3>Particles use this for velocity deviation</h3>
 
-                    <code>
-                        let deviation = (waveformValue - 128) / (32 / (Particle.frequencyResponsivenessAdjusted ?? 1));<br>
+                        <code>
+                        <span class="blue">let</span> <span class="variable">deviation</span> = (<span class="variable">waveformValue</span> - <span class="number">128</span>) / (<span class="number">32</span> / (<span class="variable">Particle.frequencyResponsivenessAdjusted</span> ?? <span class="number">1</span>));<br>
                         <span class="blue">this</span>.<span class="variable">x</span> += <span class="blue">this</span>.<span class="variable">vx</span> * (1 + <span class="variable">deviation</span>);<br>
                         <span class="blue">this</span>.<span class="variable">y</span> += <span class="blue">this</span>.<span class="variable">vy</span> * (1 + <span class="variable">deviation</span>);<br>
 
@@ -88,22 +88,63 @@
                         <span class="blue">this</span>.<span class="variable">vy</span> = <span class="variable">Math</span>.<span class="function">sin</span>(<span class="blue">this</span>.<span class="variable">angle</span>) * <span class="blue">this</span>.<span class="variable">speed</span> * <span class="class">Particle</span>.<span class="variable">particleControls</span>.<span class="variable">speedMultiplier</span>;
                     </code>
 
+                        <h4>Alpha and Size are also effected by this deviation</h4>
+
+                        <code>
+                        <span class="blue">this</span>.radius += <span class="variable">this</span>.radiusGrowthPerFrame * (<span class="number">1</span> + <span class="class">Math</span>.<span class="function">abs</span>(<span class="variable">deviation</span>));<br>
+                        <span class="blue">this</span>.alpha -= <span class="variable">this</span>.alphaFadePerFrame * (<span class="number">1</span> + <span class="class">Math</span>.<span class="function">abs</span>(<span class="variable">deviation</span>));
+                    </code>
                 </div>
-
-
-
-
-
 
 
                 <div>
-                    <span class="class">Star</span>
-                    <p>Particles are the main foreground animation They are spawned using beat detection.</p>
+                    <span class="class"><h2>Star</h2></span>
+                    <p>Stars are the circles in the background..</p>
 
-                    <p>When a beat is detected, all bins in the audio frequency data is tested for an "audible" volume.
-                        This spawns a particle at that location on a circle of radius 50</p>
+                    <p>Stars are created at the start of the application and are kept near the canvas</p>
+
+                    <h3>Stars react to audio inthe following ways:</h3>
+
+                    <h4>When 'very loud' beats are detected (average volume of the frame) the stars change to random colors</h4>
+
+                    <code>
+                    <span class="keyword">if</span> (!<span class="variable">canvas</span>.<span class="function">getBeatDetected</span>() && <span class="variable">audioData[i]</span> > <span class="class">Particle</span>.<span class="variable">particleControls</span>.<span class="variable">veryLoudBeat</span>)<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="variable">star</span>.<span class="function">changeStarsDirection();</span>
+                    </code>
+
+                    <h4>When a loud beat is detected (twice the normal audible threshold) The stars change direction randomly</h4>
+                    
+                    
+
+
+                    <code>
+                        <span class="keyword">else if</span>  (<span class="variable">average</span> > <span class="variable">particleBeatTracking.audibleThreshold</span> * <span class="number">2</span>) <br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="variable">star</span>.<span class="function">changeStarsDirection</span>();
+
+                    </code>
+
+                    <h4>Otherwise the stars move around slowly</h4>
+
                 </div>
             </div>
+
+        </section>
+
+        <section>
+
+            <h2>Other effects</h2>
+
+            <p>There is a Vignette effect that pulses with loud beats. The detection for these is the same as the star direction change</p>
+
+            <p>
+                There is also a moving radial gradient effect in the background. The speed at which the colors change increases with the average volume of the music.
+            </p>
+            
+            <p>
+                All previous modules have been left in and can be toggled on (bars/circles from pe07). I added a line module similar to the bars as well.
+            </p>
+
+            <h3>Bass Drop</h3>
 
         </section>
     </main>

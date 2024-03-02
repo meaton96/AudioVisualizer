@@ -100,9 +100,16 @@
             "title": "silhouettes",
             "filePath": "media/silo.mp3",
             "artist": "Echoes"
+        },
+        {
+            "title": "Monster",
+            "filePath": "media/monsters.mp3",
+            "artist": "LUM!X & Gabry Ponte"
         }
     ],
     "defaultParticleControls": {
+        "colorBasedOnLoudestFrequency": false,
+        "bassDropEffect": false,
         "angularVelocity": 0.01,
         "friction": 0.995,
         "alphaFadePerFrame": 0.002,

@@ -3,6 +3,8 @@ import { setWaveFormDeviation } from './canvas.js'
 export class Particle {
 
     static defaultParticleControls = {
+        colorBasedOnLoudestFrequency: false,
+        bassDropEffect: false,
         angularVelocity: .01,
         friction: 0.995,
         alphaFadePerFrame: .002,
@@ -11,20 +13,29 @@ export class Particle {
         frequencyResponsiveness: 1,
         baseRadius: 10,
         baseSpeed: 2.5,
-        minHue: 0,    
-        maxHue: 360 
+        minHue: 0,
+        maxHue: 360,
+
     };
+
     static particleControls = { ...Particle.defaultParticleControls };
     static frequencyResponsivenessAdjusted = 1;
 
-    constructor(x, y, angle, frequencyBin, speed = 2.5, radius = 5) {
+    constructor(x, y, angle, frequencyBin, speed = 2.5, radius = 5, loudestBin = 0) {
         this.x = x;             // x-coordinate                 
         this.y = y;            // y-coordinate              
         this.radius = radius;   // radius
         this.speed = speed;         // speed
+        this.color;
         const hueRange = Particle.particleControls.maxHue - Particle.particleControls.minHue;
-        const hue = Particle.particleControls.minHue + (angle / Math.PI * 180) * (hueRange / 360);
+
+        let hueAngle = Particle.particleControls.colorBasedOnLoudestFrequency ? loudestBin : angle;
+        const hue = Particle.particleControls.minHue + 
+            (hueAngle / Math.PI * 180) * 
+            (hueRange / 360);
+
         this.color = `hsl(${hue}, 100%, 50%)`;
+
         //this.color = `hsl(${angle / Math.PI * 180}, 100%, 50%`; // color
         this.angle = angle;     // angle            
         this.frequencyBin = frequencyBin;       // frequencyBin 0-255
