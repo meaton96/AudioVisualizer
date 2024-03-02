@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./styles/doc-styles.css">
+    <title>My Document</title>
+</head>
+
+<body>
+    <main>
+        <h1>Audio Visualizer Documentation</h1>
+
+        <section>
+            <h2>Audio Effects</h2>
+            <p>Just 2 simple nodes for bass or treble boost</p>
+            <div id="duo-code-snipet">
+                <pre>
+                <code>
+                    <span class="variable">bassNode</span> = <span class="variable">audioCtx</span>.<span class="function">createBiquadFilter</span>();
+                    <span class="variable">bassNode.type</span> = <span class="string">"lowshelf"</span>;
+                    <span class="variable">bassNode.frequency.value</span> = <span class="number">300</span>;
+                    <span class="variable">bassNode.gain.value</span> = <span class="number">0</span>;
+                </code>
+            </pre>
+                <pre>
+                <code>
+                    <span class="variable">trebleNode</span> = <span class="variable">audioCtx</span>.<span class="function">createBiquadFilter</span>();
+                    <span class="variable">trebleNode.type</span> = <span class="string">'highshelf'</span>;
+                    <span class="variable">trebleNode.frequency.value</span> = <span class="number">3000</span>;
+                    <span class="variable">trebleNode.gain.value</span> = <span class="number">0</span>;
+                </code>
+            </pre>
+            </div>
+        </section>
+
+        <section>
+            <h2>The Fun Stuff</h2>
+            <p>I have 2 sprites.. I read something about needing 2 right?</p>
+            <div id="split">
+                <div>
+                    <span class="class">Particle</span>
+                    <p>Particles are the main foreground animation They are spawned using beat detection.</p>
+
+                    <p>When a beat is detected, all bins in the audio frequency data is tested for an "audible" volume.
+                        This spawns a particle at that location on a circle of radius 50</p>
+
+                    <h3>Particles react to audio in the following ways:</h3>
+                    <br>
+                    <h3>Color is determined by spawn angle which is determined by frequency bin</h3>
+
+
+                    <code>
+                        <span class="blue">const</span> <span class="constant">hueRange</span> = <span class="class">Particle</span>.<span class="variable">particleControls</span>.<span class="variable">maxHue</span> - <span class="class">Particle</span>.<span class="variable">particleControls</span>.<span class="variable">minHue</span>;<br>
+                        <span class="blue">const</span> <span class="constant">hue</span> = <span class="class">Particle</span>.<span class="variable">particleControls</span>.<span class="variable">minHue</span> + <span class="variable">(<span class="variable">angle</span> / <span class="class">Math</span>.<span class="variable">PI</span> * <span class="number">180</span>)</span> * (<span class="variable">hueRange</span> / <span class="number">360</span>);<br>
+                        <span class="blue">this</span>.<span class="variable">color</span> = <span class="string">`hsl(<span class="blue">${</span><span class="constant">hue</span>}<span class="blue"></span>, 100%, 50%)`</span>;
+                    </code>
+
+
+                    <h3>Size is scaled based on volume at each bin</h3>
+
+
+                    <code>
+                        <span class="blue">let</span> <span class="variable">p</span> = <span class="blue">new</span> <span class="class">Particle</span>(<span class="variable">pos.x</span>, <span class="variable">pos.y</span>, <span class="variable">angle</span>, <span class="variable">i</span>, <span class="variable">Particle.particleControls.baseSpeed</span>, <span class="variable">audioData[i]</span> /
+                        (<span class="constant">DEFAULTS</span>.<span class="variable">numSamples</span> - <span class="number">1</span>) * <span class="class">Particle</span>.<span class="variable">particleControls.baseRadius</span>);
+                    </code>
+
+                    <h3>Particles are then updated with their corresponding wafeForm data every frame</h4>
+
+                    <code>
+                        <code>
+                            <span class="variable">let</span> <span class="variable">waveformIndex</span> = <span class="variable">Math</span>.<span class="function">floor</span>(<span class="variable">index</span> * (<span class="variable">audioDataWaveform</span>.<span class="variable">length</span> / <span class="variable">particles</span>.<span class="variable">length</span>));<br>
+                            <span class="variable">let</span> <span class="variable">waveformValue</span> = <span class="variable">audioDataWaveform</span>[<span class="variable">waveformIndex</span>];<br>
+                            <span class="variable">p</span>.<span class="function">update</span>(<span class="variable">waveformValue</span>);
+                            </code>
+                    </code>
+
+                    <h3>Particles use this for velocity deviation</h3>
+
+                    <code>
+                        <span class="blue">this</span>.<span class="variable">x</span> += <span class="blue">this</span>.<span class="variable">vx</span> * (1 + <span class="variable">deviation</span>);<br>
+                        <span class="blue">this</span>.<span class="variable">y</span> += <span class="blue">this</span>.<span class="variable">vy</span> * (1 + <span class="variable">deviation</span>);<br>
+
+                        <span class="blue">this</span>.<span class="variable">angle</span> += <span class="blue">this</span>.<span class="variable">angularVelocity</span> * (1 + <span class="variable">Math</span>.<span class="function">abs</span>(<span class="variable">deviation</span>));<br>
+                        <span class="blue">this</span>.<span class="variable">vx</span> = <span class="variable">Math</span>.<span class="function">cos</span>(<span class="blue">this</span>.<span class="variable">angle</span>) * <span class="blue">this</span>.<span class="variable">speed</span> * <span class="class">Particle</span>.<span class="variable">particleControls</span>.<span class="variable">speedMultiplier</span>;<br>
+                        <span class="blue">this</span>.<span class="variable">vy</span> = <span class="variable">Math</span>.<span class="function">sin</span>(<span class="blue">this</span>.<span class="variable">angle</span>) * <span class="blue">this</span>.<span class="variable">speed</span> * <span class="class">Particle</span>.<span class="variable">particleControls</span>.<span class="variable">speedMultiplier</span>;
+                    </code>
+
+                </div>
+
+
+
+
+
+
+
+                <div>
+                    <span class="class">Star</span>
+                    <p>Particles are the main foreground animation They are spawned using beat detection.</p>
+
+                    <p>When a beat is detected, all bins in the audio frequency data is tested for an "audible" volume.
+                        This spawns a particle at that location on a circle of radius 50</p>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+</body>
+
+</html>

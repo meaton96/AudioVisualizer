@@ -1,0 +1,116 @@
+{
+    "appTitle": "Music Player",
+    "songs": [
+        {
+            "title": "FTW",
+            "filePath": "media/ftw.mp3",
+            "artist": "Monstercat"
+        },
+        {
+            "title": "Baldur's Game 3 Main Theme",
+            "filePath": "media/baldurs.mp3",
+            "artist": "Larian Studios"
+        },
+        {
+            "title": "Becoming Insane",
+            "filePath": "media/insane.mp3",
+            "artist": "Infected Mushroom"
+        },
+        {
+            "title": "No Tears Left To Cry",
+            "filePath": "media/no-tears.mp3",
+            "artist": "Ariana Grande"
+        },
+        {
+            "title": "The Moments I'm Missing",
+            "filePath": "media/moments.mp3",
+            "artist": "White Noise & Ranji"
+        },
+        {
+            "title": "Opus",
+            "filePath": "media/opus.mp3",
+            "artist": "Eric Prydz"
+        },
+        {
+            "title": "Lost in Space",
+            "filePath": "media/lost-in-space.mp3",
+            "artist": "Infected Mushroom"
+        },
+        {
+            "title": "Surface",
+            "filePath": "media/surface.mp3",
+            "artist": "Aero Cloud"
+        },
+        {
+            "title": "Don't Leave",
+            "filePath": "media/dont-leave.mp3",
+            "artist": "Seven Lions"
+        },
+        {
+            "title": "One More Time",
+            "filePath": "media/one-more-time.mp3",
+            "artist": "Daft Punk"
+        },
+        {
+            "title": "Raccoon City",
+            "filePath": "media/raccoon.mp3",
+            "artist": "Aether & Sizzlebird"
+        },
+        {
+            "title": "No Money",
+            "filePath": "media/no-money.mp3",
+            "artist": "Galantis"
+        },
+        {
+            "title": "You In Me",
+            "filePath": "media/you-in-me.mp3",
+            "artist": "Volor Flex"
+        },
+        {
+            "title": "Missing Home",
+            "filePath": "media/missing-home.mp3",
+            "artist": "Tilka"
+        },
+        {
+            "title": "Afterhours",
+            "filePath": "media/afterhours.mp3",
+            "artist": "Tryoboi & Dippo"
+        },
+        {
+            "title": "Oceans",
+            "filePath": "media/oceans.mp3",
+            "artist": "Tryon Hapi"
+        },
+        {
+            "title": "TRNDSTTR",
+            "filePath": "media/trendsetter.mp3",
+            "artist": "Black Coast"
+        },
+        {
+            "title": "Ditto",
+            "filePath": "media/ditto.mp3",
+            "artist": "뉴진스"
+        },
+        {
+            "title": "Drive",
+            "filePath": "media/glades.mp3",
+            "artist": "Glades"
+        },
+        {
+            "title": "silhouettes",
+            "filePath": "media/silo.mp3",
+            "artist": "Echoes"
+        }
+    ],
+    "defaultParticleControls": {
+        "angularVelocity": 0.01,
+        "friction": 0.995,
+        "alphaFadePerFrame": 0.002,
+        "radiusGrowthPerFrame": 0.05,
+        "speedMultiplier": 1,
+        "frequencyResponsiveness": 1,
+        "baseRadius": 10,
+        "baseSpeed": 2.5
+    }
+
+}

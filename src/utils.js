@@ -53,5 +53,12 @@ const applySmoothing = (values, windowSize) => {
   return smoothedValues;
 };
 
+// Format time in minutes and seconds
+function formatTime(seconds) {
+  const minutes = Math.floor(seconds / 60);
+  seconds = Math.floor(seconds % 60);
+  return minutes.toString().padStart(2, '0') + ':' + seconds.toString().padStart(2, '0');
+}
 
-export { makeColor, getRandomColor, getLinearGradient, goFullscreen, applySmoothing };
+
+export { makeColor, getRandomColor, getLinearGradient, goFullscreen, applySmoothing, formatTime };

@@ -1,0 +1,80 @@
+body {
+    background: #1f1f20;
+    font-family: tahoma, verdana, sans serif;
+    color: white;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 80%;
+    margin: auto;
+}
+
+#content {
+    /* width: 100%;
+    margin: auto; */
+    text-align: left; 
+}
+    
+#duo-code-snipet {
+    display: flex;
+
+}
+#split {
+    margin: 1rem;
+    display: flex;
+}
+
+#split > * {
+    flex-basis: 50%;
+}
+
+
+.keyword {
+    color: #c586c0;
+}
+
+.string {
+    color: #ce9178;
+}
+
+.number {
+    color: #b5cea8;
+}
+
+.comment {
+    color: #6a9955;
+}
+
+.function {
+    color: #dcdcaa;
+}
+
+.variable {
+    color: #9cdcfe;
+}
+
+.operator {
+    color: #d4d4d4;
+}
+
+.error {
+    color: #f44747;
+}
+
+.constant {
+    color: #569cd6;
+}
+
+.class {
+    
+    color: #4ec9b0;
+}
+.blue {
+    color: #569cd6;
+}
+
+  
+  
