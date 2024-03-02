@@ -3,17 +3,11 @@ import { setWaveFormDeviation } from './canvas.js'
 export class Particle {
 
     static defaultParticleControls = {
-        angularVelocity: .01,
-        friction: 0.995,
-        alphaFadePerFrame: .002,
-        radiusGrowthPerFrame: 0.05,
-        speedMultiplier: 1,
-        frequencyResponsiveness: 1,
-        baseRadius: 10,
-        baseSpeed: 2.5,
-        minHue: 0,    
-        maxHue: 360 
+
     };
+    static setDefaultParticleControls = (controls) => {
+        Particle.defaultParticleControls = controls;
+    }
     static particleControls = { ...Particle.defaultParticleControls };
     static frequencyResponsivenessAdjusted = 1;
 

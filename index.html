@@ -12,7 +12,10 @@
   <main>
 
     <canvas width="1066" height="600"></canvas>
-
+    <div id="div-seek">
+      <input id="seek-bar" type="range" min="0" step="1" value="0">
+      <div id="time">00:00 / 00:00</div>
+    </div>
     <div id="controls">
 
 
@@ -23,26 +26,6 @@
 
       <label>Track:
         <select id="select-track">
-          <option value="media/ftw.mp3">FTW - Monstercat</option>
-          <option value="media/baldurs.mp3">Baldur's Game 3 Main Theme</option>
-          <option value="media/insane.mp3">Becoming Insane - Infected Mushroom</option>
-          <option value="media/no-tears.mp3">No Tears Left To Cry - Ariana Grande</option>
-          <option value="media/moments.mp3">The Moments I'm Missing - White Noise & Ranji</option>
-          <option value="media/opus.mp3">Opus - Eric Prydz</option>
-          <option value="media/lost-in-space.mp3">Lost in Space - Infected Mushroom</option>
-          <option value="media/surface.mp3">Surface - Aero Cloud</option>
-          <option value="media/dont-leave.mp3">Don't Leave - Seven Lions</option>
-          <option value="media/one-more-time.mp3">One More Time - Daft Punk</option>
-          <option value="media/raccoon.mp3">Raccoon City - Aether & Sizzlebird</option>
-          <option value="media/no-money.mp3">No Money - Galantis</option>
-          <option value="media/you-in-me.mp3">You In Me - Volor Flex</option>
-          <option value="media/missing-home.mp3">Missing Home - Tilka</option>
-          <option value="media/afterhours.mp3">Afterhours - Tryoboi & Dippo</option>
-          <option value="media/oceans.mp3">Oceans - Tryon Hapi</option>
-          <option value="media/trendsetter.mp3">TRNDSTTR - Black Coast</option>
-          <option value="media/ditto.mp3">Ditto - 뉴진스</option>
-          <option value="media/glades.mp3">Drive - Glades</option>
-          <option value="media/silo.mp3">silhouettes</option>
 
         </select>
       </label>
@@ -62,7 +45,7 @@
         <span><input type="checkbox" id="cb-particles" checked><label for="cb-particles">Show Particles</label></span>
         <div id="particle-controls">
           <div id="color-chooser">
-            <!-- Existing controls... -->
+            
             <div>
               <label for="min-hue">Min Hue:</label>
               <input type="range" id="min-hue" min="0" max="360" value="0">
@@ -75,9 +58,9 @@
             </div>
           </div>
 
-          <!-- Additional controls... -->
+          
         </div>
-        
+
       </section>
     </div>
 

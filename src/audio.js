@@ -1,4 +1,4 @@
-
+import { formatTime } from './utils.js';
 // 1 - our WebAudio context, **we will export and make this public at the bottom of the file**
 let audioCtx;
 
@@ -18,7 +18,7 @@ export const DEFAULTS = Object.freeze({
 let audioData = new Uint8Array(DEFAULTS.numSamples / 2);
 
 // **Next are "public" methods - we are going to export all of these at the bottom of this file**
-const setupWebAudio = (filePath) => {
+const setupWebAudio = (filePath, seekBar, timeElement) => {
     // 1 - The || is because WebAudio has not been standardized across browsers yet
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     audioCtx = new AudioContext();
@@ -70,6 +70,27 @@ const setupWebAudio = (filePath) => {
     trebleNode.connect(analyserNode);
     analyserNode.connect(gainNode);
     gainNode.connect(audioCtx.destination);
+
+
+    // When metadata is loaded, set max range and duration
+    element.addEventListener('loadedmetadata', () => {
+        seekBar.max = Math.floor(element.duration);
+        timeElement.textContent = formatTime(0) + ' / ' + formatTime(element.duration);
+    });
+
+    // Update seek bar as audio plays
+    element.addEventListener('timeupdate', () => {
+        seekBar.value = Math.floor(element.currentTime);
+        timeElement.textContent = formatTime(element.currentTime) + ' / ' + formatTime(element.duration);
+    });
+
+    // Seek audio when seek bar changes
+    seekBar.addEventListener('input', () => {
+        
+        element.muted = true; 
+        element.currentTime = seekBar.value; 
+        element.muted = false;
+    });
 }
 
 const loadSoundFile = (filePath) => {

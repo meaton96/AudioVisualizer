@@ -12,17 +12,18 @@ let particleBeatTracking = {
     beatHoldTime: 2.5,
     beatDecayRate: 0.9,
     beatMin: .15,
-    audibleThreshold: 120,
-    bassEndBin: 4,              //256 samples 172hz/bin = 344hz
-    veryLoudBeat: 251,
+    audibleThreshold: 110,
+    bassEndBin: 4,              //512 samples 86hz/bin ~ 344hz
+    veryLoudBeat: 220,
     letTheBassDrop: 254.9,
     bassEndVolume: 195,
-    beatTrackBinEnd: 16,
+    beatTrackBinEnd: 20,        //512 samples 86 hz/bin ~ 1720hz
     bassDropped: false
 };
 
-const frequencyScaleFactor = .2; //percent
-const trebleBoost = 1.5; //scalar
+const frequencyScaleFactor = .55; //percent
+const trebleBoost = 1.4; //scalar
+const trebleThreshold = .4; //percent
 
 let bassBPM, bassBeatCounter = 0;
 let frameCount = 0, beatFrames = 60;
@@ -30,6 +31,8 @@ let beatsPerMinuteSmoothed = [];
 let beatSmoothFrames = 3;
 
 const dropTheBass = () => {
+    
+    if (bassBPM < 2) return;
     console.log("bassDropped!");
     Particle.particleControls.baseSpeed = 5;
     Particle.particleControls.baseRadius = 15;
@@ -51,7 +54,7 @@ const updateBPM = (bassAverage, veryLoudBeatThreshold) => {
     if (bassAverage > veryLoudBeatThreshold) {
         
         bassBeatCounter++;
-        console.log(frameCount); 
+      //  console.log(frameCount); 
         if (frameCount >= beatFrames) {
             bassBPM = (bassBeatCounter / frameCount) * 60;
             beatsPerMinuteSmoothed.push(bassBPM);
@@ -62,7 +65,7 @@ const updateBPM = (bassAverage, veryLoudBeatThreshold) => {
                 sum += beatsPerMinuteSmoothed[i];
             }
             bassBPM = sum / beatsPerMinuteSmoothed.length; //average the last 3 bpm
-            console.log(bassBPM);
+           // console.log(bassBPM);
             frameCount = 0;
             bassBeatCounter = 0;
         }
@@ -108,11 +111,24 @@ const updateParticles = (audioData, audioDataWaveform, analyserNode, canvasWidth
         //increment beat counter if a loud bass beat is detected
         //for tracking bass bpm
 
-
+      //  console.log(average);
         updateBPM(bassAverage, particleBeatTracking.veryLoudBeat);
+        //flag a very loud beat to change stars/vignette
+        if (!canvas.getBeatDetected() && average > Particle.particleControls.veryLoudBeat) {
+            canvas.detectVeryLoudBeat();
+           // console.log("very loud beat detected");
+
+        }
+        else if (average > particleBeatTracking.audibleThreshold * 2) {
+            //twice as loud as the threshold
+            //used for modifying the vignette
+            canvas.detectBeat();
+         //   console.log("loud beat detected");
+
+        }
 
 
-
+      //  console.log(average);
         // Iterate through all the bins of the frequency data
         for (let i = 0; i < audioData.length; i++) {
             //console.log(`${i} - ${audioData[i]}`);    
@@ -129,23 +145,13 @@ const updateParticles = (audioData, audioDataWaveform, analyserNode, canvasWidth
 
             //  console.log(i + " - " + audioData[i] * scaleAmount);
 
-            const scaledAudioData = audioData[i] * scaleAmount * (i > audioData.length / 2 ? trebleBoost : 1);
+            const scaledAudioData = audioData[i] * scaleAmount * (i > audioData.length * trebleThreshold ? trebleBoost : 1);
 
             // Check if the frequency value exceeds the audible threshold
             if (scaledAudioData > particleBeatTracking.audibleThreshold) {
 
 
-
-                if (!canvas.getBeatDetected() && audioData[i] > Particle.particleControls.veryLoudBeat) {
-                    canvas.detectVeryLoudBeat();
-
-                }
-                else if (average > particleBeatTracking.audibleThreshold * 2) {
-                    //twice as loud as the threshold
-                    //used for modifying the vignette
-                    canvas.detectBeat();
-
-                }
+                
 
 
                 // Calculate the angle for this particle
