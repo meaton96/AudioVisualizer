@@ -41,25 +41,87 @@
     <div id="control-particles">
       <section>
         <h1>Particle Control</h1>
+        <div id="particle-container">
+        <div id="particle-buttons">
 
-        <span><input type="checkbox" id="cb-particles" checked><label for="cb-particles">Show Particles</label></span>
+        <span><button type="button" id="btn-particles" class="btn-togglable">Show Particles</button></span>
+        <span><button type="button" id="btn-colorLoudest" class="btn-togglable">Color based on Loudest</button></span>
+        <span><button type="button" id="btn-bassDropEffect" class="btn-togglable">Bass Drop</button></span>
+      </div>
         <div id="particle-controls">
-          <div id="color-chooser">
+          
             
-            <div>
+            <span>
               <label for="min-hue">Min Hue:</label>
               <input type="range" id="min-hue" min="0" max="360" value="0">
               <input type="number" id="min-hue-number" min="0" max="360" value="0">
-            </div>
-            <div>
+            </span>
+            
+            <span>
               <label for="max-hue">Max Hue:</label>
               <input type="range" id="max-hue" min="0" max="360" value="360">
               <input type="number" id="max-hue-number" min="0" max="360" value="360">
-            </div>
-          </div>
+             
+            </span>
+          
 
           
+       
+        <span>
+          <label for="range-angularVelocity">Angular Velocity: </label>
+          <input type="range" id="range-angularVelocity" min="0" max="10" step="0.1">
+          <input type="number" step="0.1" id="input-angularVelocity"><br>
+        </span>
+
+        <span>
+          <label for="range-friction">Friction: </label>
+          <input type="range" id="range-friction" min="0.99" max="0.999" step="0.001">
+          <input type="number" step="0.001" id="input-friction" min="0.99" max="0.999"><br>
+        </span>
+
+        <span>
+          <label for="range-alphaFadePerFrame">Alpha Fade Per Frame: </label>
+          <input type="range" id="range-alphaFadePerFrame" min="0.1" max="0.3" step="0.001">
+          <input type="number" step="0.001" id="input-alphaFadePerFrame"><br>
+        </span>
+
+        <span>
+          <label for="range-radiusGrowthPerFrame">Radius Growth Per Frame: </label>
+          <input type="range" id="range-radiusGrowthPerFrame" min="0" max="10" step="0.1">
+          <input type="number" step="0.1" id="input-radiusGrowthPerFrame"><br>
+        </span>
+
+        <span>
+          <label for="range-speedMultiplier">Speed Multiplier: </label>
+          <input type="range" id="range-speedMultiplier" min="0" max="10" step="0.1">
+          <input type="number" step="0.1" id="input-speedMultiplier"><br>
+        </span>
+
+        <span>
+          <label for="range-frequencyResponsiveness">Waveform Responsiveness: </label>
+          <input type="range" id="range-frequencyResponsiveness" min="0" max="10" step="0.1">
+          <input type="number" step="0.1" id="input-frequencyResponsiveness"><br>
+        </span>
+
+        <span>
+          <label for="range-baseRadius">Base Radius: </label>
+          <input type="range" id="range-baseRadius" min="0" max="10" step="0.1">
+          <input type="number" step="0.1" id="input-baseRadius"><br>
+        </span>
+
+        <span>
+          <label for="range-baseSpeed">Base Speed: </label>
+          <input type="range" id="range-baseSpeed" min="0" max="10" step="0.1">
+          <input type="number" step="0.1" id="input-baseSpeed"><br>
+        </span>
+
+        <span>
+          <label for="range-circularizationFactor">Circularization Factor: </label>
+          <input type="range" id="range-circularizationFactor" min="0" max="10" step="0.1">
+          <input type="number" step="0.1" id="input-circularizationFactor"><br>
+        </span>
         </div>
+      </div>
 
       </section>
     </div>
@@ -68,27 +130,28 @@
     <div id="checkboxes">
       <div class="control-column">
         <h2>Visualizer Modules</h2>
-        <span><input type="checkbox" id="cb-bars"><label for="cb-bars">Show Bars</label></span>
-        <span><input type="checkbox" id="cb-circles"><label for="cb-circles">Show Circles</label></span>
-        <span><input type="checkbox" id="cb-line"><label for="cb-line">Show Line</label></span>
-      </div>
-      <div class="control-column">
-        <h2>Image Effects</h2>
-        <span><input type="checkbox" id="cb-noise"><label for="cb-noise">Show Noise</label></span>
-        <span><input type="checkbox" id="cb-invert-colors"><label for="cb-invert-colors">Invert Colors</label></span>
-        <span><input type="checkbox" id="cb-emboss"><label for="cb-emboss">Show Emboss</label></span>
-      </div>
-      <div class="control-column">
-        <h2>Audio Effects</h2>
-        <span><input type="checkbox" id="cb-bass"><label for="cb-bass">Bass Boost</label></span>
-        <span><input type="checkbox" id="cb-treble"><label for="cb-treble">Treble Boost</label></span>
-      </div>
-      <div class="control-column">
-        <h2>Other Effects</h2>
-        <span><input type="checkbox" id="cb-gradient" checked><label for="cb-gradient">Show Gradient</label></span>
-        <span><input type="checkbox" id="cb-waveform"><label for="cb-waveform">Show Waveform</label></span>
-        <span><input type="checkbox" id="cb-stars" checked><label for="cb-stars">Show Stars</label></span>
-        <span><input type="checkbox" id="cb-vignette" checked><label for="cb-vignette">Show Vignette</label></span>
+          <span><button type="button" id="btn-bars" class="btn-togglable"><label for="btn-bars">Show Bars</label></button></span>
+          <span><button type="button" id="btn-circles" class="btn-togglable"><label for="btn-circles">Show Circles</label></button></span>
+          <span><button type="button" id="btn-line" class="btn-togglable"><label for="btn-line">Show Line</label></button></span>
+        </div>
+        <div class="control-column">
+          <h2>Image Effects</h2>
+          <span><button type="button" id="btn-noise" class="btn-togglable"><label for="btn-noise">Show Noise</label></button></span>
+          <span><button type="button" id="btn-invert-colors" class="btn-togglable"><label for="btn-invert-colors">Invert Colors</label></button></span>
+          <span><button type="button" id="btn-emboss" class="btn-togglable"><label for="btn-emboss">Show Emboss</label></button></span>
+        </div>
+        <div class="control-column">
+          <h2>Audio Effects</h2>
+          <span><button type="button" id="btn-bass" class="btn-togglable"><label for="btn-bass">Bass Boost</label></button></span>
+          <span><button type="button" id="btn-treble" class="btn-togglable"><label for="btn-treble">Treble Boost</label></button></span>
+        </div>
+        <div class="control-column">
+          <h2>Other Effects</h2>
+          <span><button type="button" id="btn-gradient" class="btn-togglable"><label for="btn-gradient">Show Gradient</label></button></span>
+          <span><button type="button" id="btn-waveform" class="btn-togglable"><label for="btn-waveform">Show Waveform</label></button></span>
+          <span><button type="button" id="btn-stars" class="btn-togglable"><label for="btn-stars">Show Stars</label></button></span>
+          <span><button type="button" id="btn-vignette" class="btn-togglable"><label for="btn-vignette">Show Vignette</label></button></span>
+          <span><button type="button" id="btn-tunnel" class="btn-togglable"><label for="btn-tunnel">Show Tunnel Effect</label></button></span>
       </div>
 
 

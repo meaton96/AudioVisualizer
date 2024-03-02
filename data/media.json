@@ -108,7 +108,7 @@
         }
     ],
     "defaultParticleControls": {
-        "colorBasedOnLoudestFrequency": false,
+        "colorLoudest": false,
         "bassDropEffect": false,
         "angularVelocity": 0.01,
         "friction": 0.995,
@@ -117,7 +117,8 @@
         "speedMultiplier": 1,
         "frequencyResponsiveness": 1,
         "baseRadius": 10,
-        "baseSpeed": 2.5
+        "baseSpeed": 2.5,
+        "circularizationFactor" : 3
     }
 
 }

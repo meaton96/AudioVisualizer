@@ -55,7 +55,6 @@ const updateBPM = (bassAverage, veryLoudBeatThreshold) => {
     if (bassAverage > veryLoudBeatThreshold) {
 
         bassBeatCounter++;
-        //console.log(frameCount);
         if (frameCount >= beatFrames) {
             bassBPM = (bassBeatCounter / frameCount) * 60;
             beatsPerMinuteSmoothed.push(bassBPM);
@@ -65,8 +64,7 @@ const updateBPM = (bassAverage, veryLoudBeatThreshold) => {
             for (let i = 0; i < beatsPerMinuteSmoothed.length; i++) {
                 sum += beatsPerMinuteSmoothed[i];
             }
-            bassBPM = sum / beatsPerMinuteSmoothed.length; //average the last 3 bpm
-            //console.log(bassBPM);
+            bassBPM = sum / beatsPerMinuteSmoothed.length; 
             frameCount = 0;
             bassBeatCounter = 0;
         }
@@ -105,7 +103,7 @@ const updateParticles = (audioData, audioDataWaveform, analyserNode, canvasWidth
             endBassDrop();
 
     }
-    let angleIncrement = (Math.PI * 2) / (analyserNode.fftSize / 2.35);
+    let angleIncrement = (Math.PI * 2) / (analyserNode.fftSize / Particle.particleControls.circularizationFactor);
     //console.log(average);
     //use average to spawn particles
     if (average > particleBeatTracking.beatCutOff && average > particleBeatTracking.beatMin) {
@@ -163,7 +161,7 @@ const updateParticles = (audioData, audioDataWaveform, analyserNode, canvasWidth
                 let pos = { x: canvasWidth / 2, y: canvasHeight / 2 };
                 pos.x += Math.cos(angle) * particleBeatTracking.spawnRadius; //radius of spawn from center
                 pos.y += Math.sin(angle) * particleBeatTracking.spawnRadius;
-                console.log(previousLoudestFrequencyBin);
+               // console.log(previousLoudestFrequencyBin);
                 // Create and add a new particle 
                 let p = new Particle(pos.x,
                     pos.y,

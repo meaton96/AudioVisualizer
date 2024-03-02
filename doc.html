@@ -40,7 +40,9 @@
             <p>I have 2 sprites.. I read something about needing 2 right?</p>
             <div id="split">
                 <div>
-                    <span class="class"><h2>Particle</h2></span>
+                    <span class="class">
+                        <h2>Particle</h2>
+                    </span>
                     <p>Particles are the main foreground animation They are spawned using beat detection.</p>
 
                     <p>When a beat is detected, all bins in the audio frequency data is tested for an "audible" volume.
@@ -99,23 +101,27 @@
 
 
                 <div>
-                    <span class="class"><h2>Star</h2></span>
+                    <span class="class">
+                        <h2>Star</h2>
+                    </span>
                     <p>Stars are the circles in the background..</p>
 
                     <p>Stars are created at the start of the application and are kept near the canvas</p>
 
                     <h3>Stars react to audio inthe following ways:</h3>
 
-                    <h4>When 'very loud' beats are detected (average volume of the frame) the stars change to random colors</h4>
+                    <h4>When 'very loud' beats are detected (average volume of the frame) the stars change to random
+                        colors</h4>
 
                     <code>
                     <span class="keyword">if</span> (!<span class="variable">canvas</span>.<span class="function">getBeatDetected</span>() && <span class="variable">audioData[i]</span> > <span class="class">Particle</span>.<span class="variable">particleControls</span>.<span class="variable">veryLoudBeat</span>)<br>
                         &nbsp;&nbsp;&nbsp;&nbsp;<span class="variable">star</span>.<span class="function">changeStarsDirection();</span>
                     </code>
 
-                    <h4>When a loud beat is detected (twice the normal audible threshold) The stars change direction randomly</h4>
-                    
-                    
+                    <h4>When a loud beat is detected (twice the normal audible threshold) The stars change direction
+                        randomly</h4>
+
+
 
 
                     <code>
@@ -135,18 +141,136 @@
 
             <h2>Other effects</h2>
 
-            <p>There is a Vignette effect that pulses with loud beats. The detection for these is the same as the star direction change</p>
+            <p>There is a Vignette effect that pulses with loud beats. The detection for these is the same as the star
+                direction change</p>
 
             <p>
-                There is also a moving radial gradient effect in the background. The speed at which the colors change increases with the average volume of the music.
+                There is also a moving radial gradient effect in the background. The speed at which the colors change
+                increases with the average volume of the music.
             </p>
-            
+
             <p>
-                All previous modules have been left in and can be toggled on (bars/circles from pe07). I added a line module similar to the bars as well.
+                All previous modules have been left in and can be toggled on (bars/circles from pe07). I added a line
+                module similar to the bars as well.
             </p>
 
             <h3>Bass Drop</h3>
 
+            <p>
+                As a togglable effect, the visualizer will try and detect a bass drop in the music. The code for this is
+                quite long and is in particle-controller.js
+            </p>
+
+            <p>Bass drop identification is not 100% accurate and definitely works better on some songs than others.</p>
+
+            <p>The visualizer definitely looks best on EDM with bass drops in it</p>
+
+
+
+
+        </section>
+        <section>
+            <div id="control-info">
+                <h3>Controls</h3>
+                <ul>
+                    <li>Angular Velocity</li>
+                    <ul>
+                        <li>Controls how fast the particles move in a circular pattern. Very senstive .01-.02 is best
+                        </li>
+                    </ul>
+                    <li>Friction</li>
+                    <ul>
+                        <li>How fast the particles slow down over time, best values are somewhere between .99 and .999
+                        </li>
+                    </ul>
+                    <li>Alpha Fade Per Frame</li>
+                    <ul>
+                        <li>How fast the particles fade away, default = 0.002</li>
+                        <li>IMPORTANT: particles are removed from logic updates after reaching alpha 0,<br> an alpha
+                            fade of
+                            0 will make particles infinite and probably crash your browser</li>
+                    </ul>
+                    <li>Radius Growth Per Frame</li>
+                    <ul>
+                        <li>How fast the particles grow in size as the move, default = 0.05</li>
+                    </ul>
+                    <li>Speed Multiplier</li>
+                    <ul>
+                        <li>How fast the particles move, default = 1</li>
+                    </ul>
+                    <li>Waveform Responsiveness</li>
+                    <ul>
+                        <li>How reactive the particles (and stars) are to waveform movement deviation, default = 1</li>
+                        <li>NOTE: this stacks with the base drop effect which will probably look odd</li>
+                    </ul>
+                    <li>Base Radius</li>
+                    <ul>
+                        <li>The default size of the particles before being scaled by volume, default = 10</li>
+                    </ul>
+                    <li>Base Speed</li>
+                    <ul>
+                        <li>The default speed of the particles before being scaled by volume, default = 2</li>
+                    </ul>
+                    <li>Circularization Factor</li>
+                    <ul>
+                        <li>A multiplier for angle increments to try and get a full circle, default = 2.5 which should
+                            create a mostly closed circle</li>
+                    </ul>
+                </ul>
+
+                <h3>Toggles</h3>
+                <ul>
+                    <li>Particle Display</li>
+                    <ul>
+                        <li>Toggle the display of the particles</li>
+                    </ul>
+                    <li>Color based on Loudest</li>
+                    <ul>
+                        <li>Toggles setting particle color based on loudest frequency of previous beat instead of its
+                            own frequecny bin</li>
+                    </ul>
+                    <li>Bass Drop Effect</li>
+                    <ul>
+                        <li>Toggle the bass drop effect</li>
+                        <li>Adds increased particle size, speed, and waveform responsiveness to particles</li>
+                        <li>Adds rainbow colors to stars</li>
+                    </ul>
+                    <li>Star Display</li>
+                    <ul>
+                        <li>Toggle the display of the stars</li>
+                    </ul>
+                    <li>Vignette Display</li>
+                    <ul>
+                        <li>Toggle the display of the vignette</li>
+
+                    </ul>
+                    <li>Gradient Display</li>
+                    <ul>
+                        <li>Toggle the display of the gradient</li>
+                        <li>Toggle the movement of the radial Gradient</li>
+                    </ul>
+                    <li>Waveform Display</li>
+                    <ul>
+                        <li>Toggle the display of the waveform</li>
+                        <li>Does not work well with particles</li>
+                    </ul>
+                    <li>PE 07 Stuff</li>
+                    <ul>
+                        <li>Show Bars</li>
+                        <li>Show Circles</li>
+                        <li>Invert Colors</li>
+                        <li>Emboss</li>
+                        <li>Show noise</li>
+                        
+                    </ul>
+                    <li>Other</li>
+                    <ul>
+                        <li>Bass and Treble boost</li>
+                        <li>Line display of waveform or frequency data instead of bars</li>
+                    </ul>
+
+                </ul>
+            </div>
         </section>
     </main>
 

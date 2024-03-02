@@ -6,20 +6,22 @@ import * as particleController from './particle-controller.js';
 import * as star from './star.js';
 
 const drawParams = {
-  showGradient: true,
-  showBars: false,
-  showCircles: false,
-  showNoise: false,
-  showInvert: false,
-  showEmboss: false,
-  showWaveform: false,
-  showParticles: true,
-  showLine: false,
-  showVignette: true,
-  showStars: true,
-  showTunnel: true
+  gradient: true,
+  bars: false,
+  circles: false,
+  noise: false,
+  invert: false,
+  emboss: false,
+  waveform: false,
+  particles: true,
+  line: false,
+  vignette: true,
+  stars: true,
+  tunnel: true,
+  colorLoudest: false,
+  bassDropEffect: true
 };
-const particleControls = Particle.particleControls;
+//const particleControls = Particle.particleControls;
 
 
 // 1 - here we are faking an enumeration
@@ -62,7 +64,7 @@ const setupUI = (canvasElement, json) => {
   setupVolumeSilder();
 
 
-  setupCheckboxes();
+  //setupCheckboxes();
 
   createParticleControls(json);
 
@@ -74,14 +76,15 @@ const setupUI = (canvasElement, json) => {
 
 
 const updateParticleControl = (key, value) => {
-  if (key === 'bassDropEffect' || key === 'colorBasedOnLoudestFrequency') {
+
+  if (key === 'bassDropEffect' || key === 'colorLoudest') {
     Particle.particleControls[key] = value; // Update the static property
-   // console.log(`bassDropEffect: ${Particle.particleControls[key]}`); // Log the value
+    //console.log(`${key}: ${Particle.particleControls[key]}`); // Log the value
     return;
   }
 
   Particle.particleControls[key] = parseFloat(value); // Update the static property
-  
+
 
 }
 const resetParticleControls = () => {
@@ -90,8 +93,8 @@ const resetParticleControls = () => {
     Particle.particleControls[key] = Particle.defaultParticleControls[key];
 
     // Update the corresponding slider and input field
-    const slider = document.getElementById(key);
-    const input = document.getElementById(`${key}-input`);
+    const slider = document.querySelector(`#range-${key}`);
+    const input = document.querySelector(`#input-${key}`);
     if (slider && input) {
       slider.value = Particle.defaultParticleControls[key];
       input.value = Particle.defaultParticleControls[key];
@@ -102,42 +105,27 @@ const resetParticleControls = () => {
 const createParticleControls = (json) => {
   const container = document.querySelector('#particle-controls');
 
-
   const particleControls = json.defaultParticleControls;
   Object.keys(particleControls).forEach(key => {
-    // Create a label for the control
-    const label = document.createElement('label');
-    label.innerHTML = `${key}: `;
-    label.for = key;
-
-    // Append the controls to the container
-    container.appendChild(label);
 
 
-    if (key !== 'bassDropEffect' && key !== 'colorBasedOnLoudestFrequency') {
+    try {
       // Create a slider for the control
-      const slider = document.createElement('input');
-      slider.type = 'range';
-      slider.id = key;
+      const slider = document.querySelector(`#range-${key}`);
+
       slider.value = particleControls[key];
-      // Define min, max, and step values as needed for each control
-      slider.min = 0;
-      slider.max = key.includes('alpha') || key.includes('velocity') ? 0.1 : 10; // Adjust based on your range needs
-      slider.step = key.includes('alpha') || key.includes('velocity') ? 0.001 : 0.1;
 
       // Create an input field for the control
-      const input = document.createElement('input');
-      input.type = 'number';
+      const input = document.querySelector(`#input-${key}`);
       input.value = particleControls[key];
-      input.step = slider.step; // Align step values with the slider
-      input.id = `${key}-input`;
 
+
+      // console.log(slider);
       // Update the particle control and the corresponding input field when the slider value changes
       slider.oninput = (e) => {
         const value = e.target.value;
         input.value = value;
         updateParticleControl(key, value);
-
       };
 
       // Update the particle control and the corresponding slider when the input field value changes
@@ -146,24 +134,16 @@ const createParticleControls = (json) => {
         slider.value = value;
         updateParticleControl(key, value);
       };
-      container.appendChild(slider);
-      container.appendChild(input);
-    } else {
-      // Create a checkbox for the control
-      const checkbox = document.createElement('input');
-      checkbox.type = 'checkbox';
-      checkbox.id = key;
-      checkbox.checked = particleControls[key];
-
-      checkbox.onchange = (e) => {
-        const value = e.target.checked;
-        updateParticleControl(key, value);
-      };
-      container.appendChild(checkbox);
+    } catch (error) {
+      // Skip the value and go on to the next one
+      //console.error(error);
     }
 
-    container.appendChild(document.createElement('br')); // For layout, to put each control on a new line
+
+
+    //container.appendChild(document.createElement('br')); // For layout, to put each control on a new line
   });
+
 
   // Create and append the reset button
   const resetButton = document.createElement('button');
@@ -257,97 +237,78 @@ const setupButtons = (canvasElement, json) => {
       e.target.dataset.playing = "no";
     }
   };
-  setupTrackSelector(json.songs, playButton);
-}
-
-
-
-
-const setupCheckboxes = () => {
-
-  let bassCb = document.querySelector("#cb-bass");
-  bassCb.onchange = e => {
-    if (e.target.checked) {
+  const bassBtn = document.querySelector("#btn-bass");
+  let isBassEnabled = false;
+  bassBtn.onclick = () => {
+    isBassEnabled = !isBassEnabled;
+    if (isBassEnabled) {
       audio.setBassFilter();
-    }
-    else {
+    } else {
       audio.removeBassFilter();
     }
-  }
+  };
 
-  let trebleCB = document.querySelector("#cb-treble");
-  trebleCB.onchange = e => {
-    if (e.target.checked) {
+  const trebleBtn = document.querySelector("#btn-treble");
+  let isTrebleEnabled = false;
+  trebleBtn.onclick = () => {
+    isTrebleEnabled = !isTrebleEnabled;
+    if (isTrebleEnabled) {
       audio.setTrebleFilter();
-    }
-    else {
+    } else {
       audio.removeTrebleFilter();
     }
-  }
-
-
-
-  let gradientCB = document.querySelector("#cb-gradient");
-
-  gradientCB.onchange = e => {
-    drawParams.showGradient = e.target.checked;
   };
 
-  let barsCB = document.querySelector("#cb-bars");
-
-  barsCB.onchange = e => {
-    drawParams.showBars = e.target.checked;
+  const toggleDrawParam = (param) => {
+    if (param === 'bassDropEffect' || param === 'colorLoudest') {
+      updateParticleControl(param, !Particle.particleControls[param]);
+    }
+    else {
+      drawParams[param] = !drawParams[param];
+    }
+    const button = document.querySelector(`#btn-${param}`);
+    button.classList.toggle('active');
   };
 
-  let circlesCB = document.querySelector("#cb-circles");
+  const setupButtonClick = (param) => {
+    const button = document.querySelector(`#btn-${param}`);
+    button.onclick = () => {
 
-  circlesCB.onchange = e => {
-    drawParams.showCircles = e.target.checked;
+      toggleDrawParam(param);
+    };
+
+    //console.log(drawParams);
+    // Check if the initial value is true
+    if (drawParams[param]) {
+      button.classList.add('active');
+    }
   };
 
-  let noiseCB = document.querySelector("#cb-noise");
+  const controlColumns = document.querySelector('#checkboxes').querySelectorAll('.control-column');
+  const particleButtons = document.querySelector('#particle-buttons').querySelectorAll('button');
 
-  noiseCB.onchange = e => {
-    drawParams.showNoise = e.target.checked;
-  };
-
-  let invertColorsCB = document.querySelector("#cb-invert-colors");
-
-  invertColorsCB.onchange = e => {
-    drawParams.showInvert = e.target.checked;
+  const setupToggleButton = (button) => {
+    const buttonId = button.id.replace('btn-', '');
+    setupButtonClick(buttonId);
   }
 
-  let embossCB = document.querySelector("#cb-emboss");
 
-  embossCB.onchange = e => {
-    drawParams.showEmboss = e.target.checked;
-  }
+  controlColumns.forEach(column => {
+    const buttons = column.querySelectorAll('button');
+    buttons.forEach(button => setupToggleButton(button));
+  });
 
-  let waveformCB = document.querySelector("#cb-waveform");
-  waveformCB.onchange = e => {
-    drawParams.showWaveform = e.target.checked;
-  }
+  
 
-  let particlesCB = document.querySelector("#cb-particles");
-  particlesCB.onchange = e => {
-    drawParams.showParticles = e.target.checked;
-  }
+  particleButtons.forEach(button => setupToggleButton(button));
 
-  let lineCB = document.querySelector("#cb-line");
-  lineCB.onchange = e => {
-    drawParams.showLine = e.target.checked;
-  }
-  let vignetteCB = document.querySelector("#cb-vignette");
-  vignetteCB.onchange = e => {
-    drawParams.showVignette = e.target.checked;
-  }
-
-  let starsCB = document.querySelector("#cb-stars");
-  starsCB.onchange = e => {
-    drawParams.showStars = e.target.checked;
-  }
+  setupTrackSelector(json.songs, playButton);
 
 }
+
+
+
+
 
 const loop = () => {
   setTimeout(() => {

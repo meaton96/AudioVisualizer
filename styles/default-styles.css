@@ -18,11 +18,15 @@ body {
   #checkboxes {
     width: 60%;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     background: #444242;
     padding: 1rem;
     border-radius: 0.5rem;
     margin-top: 1rem;
+  }
+
+  #checkboxes > div {
+    flex: 1;
   }
   
   #label-volume{
@@ -66,6 +70,37 @@ body {
     width: 60%;
     text-align: center;
   }
+  #particle-controls {
+    display: flex;
+    flex-direction: column;
+  }
+
+  #particle-controls span {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+
+  #particle-controls span label {
+    margin: 0 10px;
+    text-align: left;
+  }
+
+  #particle-controls span input[type="number"] {
+    margin: 0 10px;
+    text-align: right;
+  }
+
+  #particle-controls span input[type="range"] {
+    flex: 1;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  #particle-controls span input[type="number"],
+  #particle-controls span input[type="range"] {
+    width: 50px;
+  }
 
   #seek-bar {
     -webkit-appearance: none; 
@@ -106,3 +141,34 @@ body {
     display: flex;
     margin-bottom: 1rem;
   }
+
+  .btn-togglable {
+    border: none;
+    outline: none;
+    background-color: #fafafa;
+    color: #444242;
+    width: 100%;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .btn-togglable.active {
+    background-color: #4CAF50;
+    color: #fafafa;
+  }
+
+  
+#particle-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  }
+
+  #particle-container > * {
+    flex-basis: 50%;
+    
+  }
+
+  

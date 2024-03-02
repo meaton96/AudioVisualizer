@@ -3,8 +3,8 @@ import { setWaveFormDeviation } from './canvas.js'
 export class Particle {
 
     static defaultParticleControls = {
-        colorBasedOnLoudestFrequency: false,
-        bassDropEffect: false,
+        colorLoudest: false,
+        bassDropEffect: true,
         angularVelocity: .01,
         friction: 0.995,
         alphaFadePerFrame: .002,
@@ -15,6 +15,7 @@ export class Particle {
         baseSpeed: 2.5,
         minHue: 0,
         maxHue: 360,
+        circularizationFactor: 3
 
     };
 
@@ -29,7 +30,7 @@ export class Particle {
         this.color;
         const hueRange = Particle.particleControls.maxHue - Particle.particleControls.minHue;
 
-        let hueAngle = Particle.particleControls.colorBasedOnLoudestFrequency ? loudestBin : angle;
+        let hueAngle = Particle.particleControls.colorLoudest ? loudestBin : angle;
         const hue = Particle.particleControls.minHue + 
             (hueAngle / Math.PI * 180) * 
             (hueRange / 360);

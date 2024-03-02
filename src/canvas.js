@@ -89,28 +89,28 @@ const draw = (params = {}) => {
     // 1 - populate the audioData array with the frequency data from the analyserNode
     // notice these arrays are passed "by reference" 
     analyserNode.getByteTimeDomainData(audioDataWaveform);
-    if (params.showWaveform) {
+    if (params.waveform) {
         audioData = audioDataWaveform;
     }
     else {
         analyserNode.getByteFrequencyData(audioData);
     }
-    if (params.showTunnel && audioData && audioData[0] != 0)
+    if (params.tunnel && audioData && audioData[0] != 0)
         updateTunnelGradient(audioData);
     
 
 
-    if (params.showGradient) {
+    if (params.gradient) {
         // Draw the dynamic gradient background
         ctx.save();
         ctx.fillStyle = gradient;
-        ctx.globalAlpha = params.showWaveform ? 1 : 0.5;
+        ctx.globalAlpha = params.waveform ? 1 : 0.5;
         ctx.fillRect(0, 0, canvasWidth, canvasHeight);
         ctx.restore();
     }
 
 
-    if (params.showStars) {
+    if (params.stars) {
         star.updateStars(frameWaveformDeviation);
         star.drawStars();
     }
@@ -118,7 +118,7 @@ const draw = (params = {}) => {
     beatDetected = false;
     drawAudioVisualizer(params);
 
-    if (params.showVignette)
+    if (params.vignette)
         drawVignette(beatIntensity);
     if (!beatDetected) {
         fadeVignette(vignetteFadeSpeed);
@@ -198,7 +198,7 @@ const alterImage = (params = {}) => {
     // B) Iterate through each pixel, stepping 4 elements at a time (which is the RGBA for 1 pixel)
     for (let i = 0; i < length; i += 4) {
 
-        if (params.showNoise && Math.random() < .05) {
+        if (params.noise && Math.random() < .05) {
 
             /// Calculate the x and y positions of the pixel
             let x = (i / 4) % width;
@@ -213,7 +213,7 @@ const alterImage = (params = {}) => {
             // data[i + 3] is the alpha channel, leave it as is for full opacity
         } // end if
 
-        if (params.showInvert) {
+        if (params.invert) {
             let red = data[i], green = data[i + 1], blue = data[i + 2];
             data[i] = 255 - red; // set red value
             data[i + 1] = 255 - green; // set blue value
@@ -222,7 +222,7 @@ const alterImage = (params = {}) => {
 
     } // end for
 
-    if (params.showEmboss) {
+    if (params.emboss) {
         for (let i = 0; i < length; i++) {
             if (i % 4 == 3) continue; // skip alpha channel
             data[i] = 127 + 2 * data[i] - data[i + 4] - data[i + width * 4];
@@ -237,28 +237,19 @@ const drawAudioVisualizer = (params = {}) => {
     // 2 - draw background
     ctx.save();
     ctx.fillStyle = "black";
-    ctx.globalAlpha = params.showWaveform ? 1 : .1;
+    ctx.globalAlpha = params.waveform ? 1 : .1;
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
     ctx.restore();
 
-    // 3 - draw gradient
-    // if (params.showGradient) {
-    //     ctx.save();
-    //     ctx.fillStyle = gradient;
-    //     ctx.globalAlpha = params.showWaveform ? 1 : .5;
-    //     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-    //     ctx.restore();
-    // }
-    // 4 - draw bars
 
-    if (params.showBars) {
+    if (params.bars) {
 
         let barSpacing = 4;
         let margin = 5;
         let screenWidthForBars = canvasWidth - (audioData.length * barSpacing) - margin * 2;
         let barWidth = screenWidthForBars / audioData.length;
         let barHeight = 200;
-        let topSpacing = params.showWaveform ? 0 : 300;
+        let topSpacing = params.waveform ? 0 : 300;
 
         ctx.save();
         ctx.fillStyle = 'rgba(0,255,0,0.50)';
@@ -270,7 +261,7 @@ const drawAudioVisualizer = (params = {}) => {
         ctx.restore();
     }
     // 5 - draw circles
-    if (params.showCircles && !params.showWaveform) {
+    if (params.circles && !params.waveform) {
 
         let maxRadius = canvasHeight / 4;
         ctx.save();
@@ -301,10 +292,10 @@ const drawAudioVisualizer = (params = {}) => {
         }
         ctx.restore();
     }
-    if (params.showParticles) {
+    if (params.particles) {
         particleController.updateParticles(audioData, audioDataWaveform, analyserNode, canvasWidth, canvasHeight, ctx);
     }
-    if (params.showLine) {
+    if (params.line) {
         let margin = 4; // Margin from the bottom of the canvas
         let height = canvasHeight - margin; // Y position for the line (near the bottom)
         let width = canvasWidth / audioData.length; // Width of each segment of the line
