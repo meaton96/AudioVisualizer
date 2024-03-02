@@ -79,6 +79,7 @@
                     <h3>Particles use this for velocity deviation</h3>
 
                     <code>
+                        let deviation = (waveformValue - 128) / (32 / (Particle.frequencyResponsivenessAdjusted ?? 1));<br>
                         <span class="blue">this</span>.<span class="variable">x</span> += <span class="blue">this</span>.<span class="variable">vx</span> * (1 + <span class="variable">deviation</span>);<br>
                         <span class="blue">this</span>.<span class="variable">y</span> += <span class="blue">this</span>.<span class="variable">vy</span> * (1 + <span class="variable">deviation</span>);<br>
 

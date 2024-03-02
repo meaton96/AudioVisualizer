@@ -12,17 +12,18 @@ let particleBeatTracking = {
     beatHoldTime: 2.5,
     beatDecayRate: 0.9,
     beatMin: .15,
-    audibleThreshold: 120,
-    bassEndBin: 4,              //256 samples 172hz/bin = 344hz
-    veryLoudBeat: 251,
+    audibleThreshold: 110,
+    bassEndBin: 4,              
+    veryLoudBeat: 220,
     letTheBassDrop: 254.9,
     bassEndVolume: 195,
-    beatTrackBinEnd: 16,
+    beatTrackBinEnd: 20,        //512 samples 86 hz/bin = 1720hz
     bassDropped: false
 };
 
 const frequencyScaleFactor = .2; //percent
 const trebleBoost = 1.5; //scalar
+const trebleThreshold = 0.4; //percent
 
 let bassBPM, bassBeatCounter = 0;
 let frameCount = 0, beatFrames = 60;
@@ -30,6 +31,7 @@ let beatsPerMinuteSmoothed = [];
 let beatSmoothFrames = 3;
 
 const dropTheBass = () => {
+    if (bassBPM < 2) return;
     console.log("bassDropped!");
     Particle.particleControls.baseSpeed = 5;
     Particle.particleControls.baseRadius = 15;
@@ -129,7 +131,7 @@ const updateParticles = (audioData, audioDataWaveform, analyserNode, canvasWidth
 
             //  console.log(i + " - " + audioData[i] * scaleAmount);
 
-            const scaledAudioData = audioData[i] * scaleAmount * (i > audioData.length / 2 ? trebleBoost : 1);
+            const scaledAudioData = audioData[i] * scaleAmount * (i > audioData.length * trebleThreshold ? trebleBoost : 1);
 
             // Check if the frequency value exceeds the audible threshold
             if (scaledAudioData > particleBeatTracking.audibleThreshold) {
