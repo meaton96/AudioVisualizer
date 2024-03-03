@@ -109,8 +109,6 @@ const createParticleControls = (json) => {
       const input = document.querySelector(`#input-${key}`);
       input.value = particleControls[key];
 
-
-      // console.log(slider);
       // Update the particle control and the corresponding input field when the slider value changes
       slider.oninput = (e) => {
         const value = e.target.value;
@@ -124,22 +122,16 @@ const createParticleControls = (json) => {
         slider.value = value;
         updateParticleControl(key, value);
       };
-    } catch (error) {
-      // Skip the value and go on to the next one
-      //console.error(error);
-    }
+    } catch (error) { }
 
-
-
-    //container.appendChild(document.createElement('br')); // For layout, to put each control on a new line
   });
 
 
   // Create and append the reset button
   const resetButton = document.createElement('button');
   resetButton.textContent = 'Reset to Default';
-  resetButton.onclick = resetParticleControls; // Set the click event to reset the controls
-  container.appendChild(resetButton); // Append the reset button to the container
+  resetButton.onclick = resetParticleControls; 
+  container.appendChild(resetButton); 
 
   // Event listeners for the hue range controls
   document.querySelector('#min-hue').addEventListener('input', (e) => {
@@ -205,12 +197,10 @@ const setupButtons = (canvasElement, json) => {
   };
   const playButton = document.querySelector("#btn-play");
   playButton.onclick = e => {
-    // console.log(`audioCtx.state before = ${audio.audioCtx.state}`);
     // check if context is in suspended state (autoplay policy)
     if (audio.audioCtx.state == "suspended") {
       audio.audioCtx.resume();
     }
-    // console.log(`audioCtx.state after = ${audio.audioCtx.state}`);
     if (e.target.dataset.playing == "no") {
       // if track is currently paused, play it
       particleController.clearParticles();

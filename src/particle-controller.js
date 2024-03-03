@@ -28,7 +28,7 @@ const trebleThreshold = 0.4; //percent
 let bassBPM, bassBeatCounter = 0;
 let frameCount = 0, beatFrames = 60;
 let beatsPerMinuteSmoothed = [];
-let beatSmoothFrames = 3;
+let beatSmoothSeconds = 3;
 let previousLoudestFrequencyBin = 0;
 let loudestFrequencyBin = 0;
 
@@ -64,7 +64,7 @@ const updateBPM = (bassAverage, veryLoudBeatThreshold) => {
         if (frameCount >= beatFrames) {
             bassBPM = (bassBeatCounter / frameCount) * 60;
             beatsPerMinuteSmoothed.push(bassBPM);
-            if (beatsPerMinuteSmoothed.length > beatSmoothFrames)
+            if (beatsPerMinuteSmoothed.length > beatSmoothSeconds)
                 beatsPerMinuteSmoothed = beatsPerMinuteSmoothed.slice(1);
             let sum = 0;
             for (let i = 0; i < beatsPerMinuteSmoothed.length; i++) {
@@ -156,7 +156,7 @@ const createParticle = (angleIncrement, i, audioData, average, canvasWidth, canv
         let pos = { x: canvasWidth / 2, y: canvasHeight / 2 };
         pos.x += Math.cos(angle) * particleBeatTracking.spawnRadius; //radius of spawn from center
         pos.y += Math.sin(angle) * particleBeatTracking.spawnRadius;
-        // console.log(previousLoudestFrequencyBin);
+
         // Create and add a new particle 
         let p = new Particle(pos.x,
             pos.y,
