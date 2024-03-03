@@ -114,6 +114,15 @@ body {
     border-radius: 5px;
     margin-right: 1rem; 
   }
+  footer{
+    margin-top: 2rem;
+    padding-top: 1rem;
+    text-align: center;
+    width: 60%;
+    margin: auto;
+    text-align: left;
+
+}
   
   #seek-bar:hover {
     opacity: 1; 
