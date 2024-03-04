@@ -2,13 +2,14 @@ let stars = [];
 
 let starSpeed = 1;
 let starFriction = .9999;
+let starCanvasMulti = 1.1;
 
 
 const createStars = (count, canvasWidth, canvasHeight, ctx) => {
     for (let i = 0; i < count; i++) {
         stars.push(
-            new Star(Math.random() * canvasWidth * 1.1 - (canvasWidth * .1),
-                Math.random() * canvasHeight * 1.1 - (canvasHeight * .1),
+            new Star(Math.random() * canvasWidth * starCanvasMulti + (canvasWidth * (1 - starCanvasMulti)),
+                Math.random() * canvasHeight * starCanvasMulti + (canvasHeight * (1 - starCanvasMulti)),
                 Math.random() * 5,
                 0,
                 0,
@@ -83,17 +84,17 @@ class Star {
     move = (deviation) => {
         this.x += this.vx * (1 + deviation);
         this.y += this.vy * (1 + deviation);
-        if (this.x > this.canvasWidth * 2) {
-            this.x = -this.canvasWidth;
+        if (this.x > this.canvasWidth * 1.1) {
+            this.x = -this.canvasWidth * .05;
         }
-        if (this.x < -this.canvasWidth) {
-            this.x = this.canvasWidth * 2;
+        if (this.x < -this.canvasWidth * .1) {
+            this.x = this.canvasWidth * 1.05;
         }
-        if (this.y > this.canvasHeight * 2) {
-            this.y = -this.canvasHeight;
+        if (this.y > this.canvasHeight * 1.1) {
+            this.y = -this.canvasHeight  * .05;
         }
-        if (this.y < -this.canvasHeight) {
-            this.y = this.canvasHeight * 2;
+        if (this.y < -this.canvasHeight * .1) {
+            this.y = this.canvasHeight * 1.05;
         }
         this.vx *= starFriction;
         this.vy *= starFriction;

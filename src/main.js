@@ -153,7 +153,7 @@ const createParticleControls = (json) => {
 
 }
 const setupTrackSelector = (songList, playButton) => {
-
+  console.log(songList);
   let trackSelect = document.querySelector("#select-track");
   // add <option> elements to the <select>
   const htmlString = songList.map((track) => {
