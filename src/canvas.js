@@ -52,7 +52,7 @@ const setupCanvas = (canvasElement, analyserNodeRef) => {
     // this is the array where the analyser data will be stored
     audioData = new Uint8Array(analyserNode.fftSize / 2);
     audioDataWaveform = new Uint8Array(analyserNode.fftSize / 2);
-    star.createStars(2000, canvasWidth, canvasHeight, ctx);
+    star.createStars(500, canvasWidth, canvasHeight, ctx);
 
 }
 const getBeatDetected = () => { return beatDetected; }

@@ -12,12 +12,12 @@ let particleBeatTracking = {
     beatHoldTime: 2.5,
     beatDecayRate: 0.9,
     beatMin: .15,
-    audibleThreshold: 110,
-    bassEndBin: 4,
-    veryLoudBeat: 220,
+    audibleThreshold: 115,
+    bassEndBin: 2,
+    veryLoudBeat: 230,
     letTheBassDrop: 254.9,
     bassEndVolume: 195,
-    beatTrackBinEnd: 20,        //512 samples 86 hz/bin = 1720hz
+    beatTrackBinEnd: 10,        //256 samples 172hz/bin
     bassDropped: false
 };
 

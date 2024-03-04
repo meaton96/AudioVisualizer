@@ -7,8 +7,8 @@ let starFriction = .9999;
 const createStars = (count, canvasWidth, canvasHeight, ctx) => {
     for (let i = 0; i < count; i++) {
         stars.push(
-            new Star(Math.random() * canvasWidth * 2 - canvasWidth,
-                Math.random() * canvasHeight * 2 - canvasHeight,
+            new Star(Math.random() * canvasWidth * 1.1 - (canvasWidth * .1),
+                Math.random() * canvasHeight * 1.1 - (canvasHeight * .1),
                 Math.random() * 5,
                 0,
                 0,
